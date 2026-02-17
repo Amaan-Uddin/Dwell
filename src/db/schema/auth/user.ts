@@ -17,11 +17,11 @@ export const user = authSchema.table("user", {
     fullName: varchar({ length: 60 })
         .generatedAlwaysAs(
             (): SQL => sql`${user.firstName} || ' ' || ${user.lastName}`
-        ), // using the generatedAlwaysAs method with a callback to allow us to reference columns from our table to generate the full_name column
+        ).notNull(), // using the generatedAlwaysAs method with a callback to allow us to reference columns from our table to generate the full_name column
     email: varchar({ length: 320 }).notNull(), // we are considering the the the email name to be 64 characters long and the address to be 255 characters and including `@` we get total 320 characters
     password: varchar({ length: 256 }),
     status: userStatus().notNull(),
-    roles: userRoles().notNull(),
+    role: userRoles().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp(),
     deletedAt: timestamp(),
