@@ -4,6 +4,6 @@ import { resident } from "@/db/schema/housing/resident"
 import { house } from "@/db/schema/housing/house"
 
 export const userRelations = relations(user, ({ many }) => ({
-    resident_list: many(resident), // this field holds a list resident id which the user has (i.e. which all houses is the user a resident of)
-    house_list: many(house)
+    resident_list: many(resident), // list of resident IDs the user is connected to
+    house_list: many(house) // users can create multiple houses, but be in one at a time.
 }))
