@@ -18,7 +18,7 @@ export const user = authSchema.table("user", {
         .generatedAlwaysAs(
             (): SQL => sql`${user.firstName} || ' ' || ${user.lastName}`
         ).notNull(), // using the generatedAlwaysAs method with a callback to allow us to reference columns from our table to generate the full_name column
-    email: varchar({ length: 320 }).notNull(), // we are considering the the the email name to be 64 characters long and the address to be 255 characters and including `@` we get total 320 characters
+    email: varchar({ length: 254 }).notNull(), // we are considering the the local name to be max 64 characters long and the domain address to be max 255 characters and including `@`, total length should be less than 254 as per (RFC 5321 std)
     password: varchar({ length: 256 }),
     status: userStatus().notNull(),
     role: userRoles().notNull(),
