@@ -1,5 +1,5 @@
 export class Email {
-    private constructor(private readonly value: string) { }
+    private constructor(private readonly email: string) { }
 
     // factory method for creating our class object
     static create(value: string): Email {
@@ -95,12 +95,12 @@ export class Email {
         return new Email(email)
     }
 
-    getValue(): string {
-        return this.value
+    get value(): string {
+        return this.email
     }
 
     mask(): string {
-        const [local, domain] = this.value.split("@") // the value is validated as the only way to create an Email object is through the factory method
+        const [local, domain] = this.email.split("@") // the value is validated as the only way to create an Email object is through the factory method
         const localPart = local.length > 3 ? local.slice(0, 3) : local[0]
         return `${localPart}*****@${domain}`
     }
