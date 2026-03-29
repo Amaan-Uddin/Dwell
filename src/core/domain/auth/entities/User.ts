@@ -19,6 +19,7 @@ export interface UserProps {
     fullName: string
     email: Email,
     password: Password
+    externalAuthId?: string
     status: UserStatus
     role: UserRoles
     createdAt: Date
