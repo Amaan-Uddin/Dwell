@@ -1,4 +1,16 @@
 import { Email } from "../value-objects/Email"
+import { Password } from "../value-objects/Password"
+
+enum UserStatus {
+    ACTIVE = "ACTIVE",
+    DELETED = "DELETED"
+}
+
+enum UserRoles {
+    ADMIN = "ADMIN",
+    USER = "USER",
+    GUEST = "GUEST"
+}
 
 export interface UserProps {
     id: number
@@ -6,9 +18,9 @@ export interface UserProps {
     lastName?: string
     fullName: string
     email: Email,
-    password: string
-    status: string
-    role: string
+    password: Password
+    status: UserStatus
+    role: UserRoles
     createdAt: Date
     updatedAt: Date
     deletedAt?: Date
