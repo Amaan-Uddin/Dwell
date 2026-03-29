@@ -18,7 +18,7 @@ export interface UserProps {
     lastName?: string
     fullName: string
     email: Email,
-    password: Password
+    password?: Password
     externalAuthId?: string
     status: UserStatus
     role: UserRoles
