@@ -17,7 +17,7 @@ export interface UserProps {
     firstName: string
     lastName?: string
     fullName?: string
-    email: Email,
+    email?: Email,
     password?: Password
     externalAuthId?: string
     status: UserStatus
@@ -30,7 +30,7 @@ export interface UserProps {
 export class User {
     private constructor(private props: UserProps) { }
 
-    // factory method for creating a User object
+    // factory method for creating a user
     static async create(params: {
         firstName: string,
         lastName?: string,
@@ -77,6 +77,25 @@ export class User {
         )
     }
 
+    // factory method for guest users
+    static createGuest(sessionId: string): User {
+        // guest users will not have many of the UserProps so we can default the values in core logic
+        const now = new Date()
+
+        return new User({
+            id: sessionId,
+            firstName: "Guest",
+            lastName: undefined,
+            email: undefined,
+            password: undefined,
+            externalAuthId: undefined,
+            status: UserStatus.ACTIVE,
+            role: UserRoles.GUEST,
+            createdAt: now,
+            updatedAt: now
+        })
+    }
+
     // reconstitute the User from persistence (from Database)
     // when loading from db we trust the data as it was previously validated before being stored
     static reconstitute(props: UserProps): User {
@@ -92,8 +111,8 @@ export class User {
         return this.props.fullName
     }
 
-    get email(): string {
-        return this.props.email.value
+    get email(): string | undefined {
+        return this.props.email?.value
     }
 
     get status(): string {
@@ -103,6 +122,10 @@ export class User {
     get role(): string {
         return this.props.role
     }
+
+
+
+
 
 
 }
