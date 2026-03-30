@@ -16,6 +16,7 @@ export interface UserProps {
     id: string
     firstName: string
     lastName?: string
+    fullName?: string
     email: Email,
     password?: Password
     externalAuthId?: string
@@ -29,6 +30,7 @@ export interface UserProps {
 export class User {
     private constructor(private props: UserProps) { }
 
+    // factory method for creating a User object
     static async create(params: {
         firstName: string,
         lastName?: string,
@@ -74,4 +76,33 @@ export class User {
             }
         )
     }
+
+    // reconstitute the User from persistence (from Database)
+    // when loading from db we trust the data as it was previously validated before being stored
+    static reconstitute(props: UserProps): User {
+        return new User(props)
+    }
+
+    // Getters
+    get id(): string {
+        return this.props.id
+    }
+
+    get fullName(): string | undefined {
+        return this.props.fullName
+    }
+
+    get email(): string {
+        return this.props.email.value
+    }
+
+    get status(): string {
+        return this.props.status
+    }
+
+    get role(): string {
+        return this.props.role
+    }
+
+
 }
