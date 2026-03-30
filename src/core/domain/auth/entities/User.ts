@@ -124,6 +124,23 @@ export class User {
     }
 
 
+    isGuest(): boolean {
+        return this.props.role === UserRoles.GUEST
+    }
+    isUser(): boolean {
+        return this.props.role === UserRoles.USER
+    }
+    isAdmin(): boolean {
+        return this.props.role === UserRoles.ADMIN
+    }
+
+    isActive(): boolean {
+        return this.props.status === UserStatus.ACTIVE
+    }
+    isDeleted(): boolean {
+        return this.props.status === UserStatus.DELETED
+    }
+
 
 
 
