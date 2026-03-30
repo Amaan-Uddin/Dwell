@@ -141,6 +141,121 @@ export class User {
         return this.props.status === UserStatus.DELETED
     }
 
+    // Business methods
+    // methods for change of state of password
+    async verifyPassword(plainText: string, hasher: IPasswordHasher): Promise<boolean> {
+        if (!this.props.password) {
+            return false
+        }
+        return await this.props.password.verify(plainText, hasher)
+    }
+
+    async changePassword(oldPassword: string, newPassword: string, hasher: IPasswordHasher): Promise<void> {
+        if (!this.props.password) {
+            throw new Error("User does not have a password.")
+        }
+
+        if (!(await this.verifyPassword(oldPassword, hasher))) {
+            throw new Error("Incorrect password.")
+        }
+
+        const password = await Password.create(newPassword, hasher)
+
+        this.props.password = password
+        this.props.updatedAt = new Date()
+    }
+
+    async resetPassword(newPassword: string, hasher: IPasswordHasher): Promise<void> {
+        if (!this.props.password) {
+            throw new Error("User does not have a password.")
+        }
+
+        if (await this.verifyPassword(newPassword, hasher)) {
+            throw new Error("New password cannot be same as old password.")
+        }
+
+        const password = await Password.create(newPassword, hasher)
+
+        this.props.password = password
+        this.props.updatedAt = new Date()
+    }
+
+    // transforming guest to user
+    async promoteGuestToUser(params: {
+        firstName: string,
+        lastName?: string,
+        email: string,
+        password?: string,
+        externalAuthId?: string,
+    }, hasher: IPasswordHasher): Promise<void> {
+        if (!this.isGuest()) {
+            throw new Error("Not a guest, cannot be promoted to a user.")
+        }
+
+        if (!params.firstName || params.firstName.trim().length == 0) {
+            throw new Error("First name must not be empty.")
+        }
+        this.props.firstName = params.firstName
+
+        if (params.lastName && params.lastName.trim().length == 0) {
+            throw new Error("Last name must cannot be empty.")
+        }
+        this.props.lastName = params.lastName
+
+        this.props.email = Email.create(params.email)
+        this.props.password = params.password ? await Password.create(params.password, hasher) : undefined
+        this.props.externalAuthId = params.externalAuthId ?? undefined
+
+        this.props.role = UserRoles.USER
+
+        this.props.updatedAt = new Date()
+    }
+
+    promoteToAdmin(): void {
+        if (!this.isUser()) {
+            if (this.isAdmin()) {
+                throw new Error("User is already an admin.")
+            }
+            if (this.isGuest()) {
+                throw new Error("Guest cannot be promoted to an admin.")
+            }
+        }
+
+        this.props.role = UserRoles.ADMIN
+        this.props.updatedAt = new Date()
+    }
+
+    demoteToUser(): void {
+        if (!this.isAdmin()) {
+            if (this.isUser()) {
+                throw new Error("Already has user role.")
+            }
+            if (this.isGuest()) {
+                throw new Error("Guest cannot be demoted to user.")
+            }
+        }
+
+        this.props.role = UserRoles.USER
+        this.props.updatedAt = new Date()
+    }
+
+    // deleting user (soft delete: update a flag i.e status to say DELETED)
+    deleteUser(): void {
+        if (this.isDeleted()) {
+            throw new Error("User is already deleted.")
+        }
+
+        if (this.isAdmin()) {
+            throw new Error("User cannot be deleted.")
+        }
+
+        const now = new Date()
+
+        this.props.status = UserStatus.DELETED
+        this.props.updatedAt = now
+        this.props.deletedAt = now
+    }
+
 
 
 
