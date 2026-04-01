@@ -7,7 +7,7 @@ enum HouseStatus {
 export interface HouseProps {
     id: string
     name: string
-    description?: string | null
+    description?: string
     ownedBy: string
     status: HouseStatus
     createdAt: Date
@@ -35,7 +35,7 @@ export class House {
         return new House({
             id: crypto.randomUUID(),
             name: params.name,
-            description: params.description?.trim() || null,
+            description: params.description?.trim() || undefined,
             ownedBy: params.createdBy,
             status: HouseStatus.ACTIVE,
             createdAt: now,
@@ -46,4 +46,25 @@ export class House {
     static reconstitute(props: HouseProps): House {
         return new House(props)
     }
+
+    get id(): string {
+        return this.props.id
+    }
+
+    get name(): string {
+        return this.props.name
+    }
+
+    get description(): string | undefined {
+        return this.props.description
+    }
+
+    get ownedBy(): string {
+        return this.props.ownedBy
+    }
+
+    get status(): string {
+        return this.props.status
+    }
+
 }
