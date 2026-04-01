@@ -47,7 +47,7 @@ export class User {
 
         // lastName is optional, so we check if it exist, if so then check length after trimming
         if (params.lastName && params.lastName.trim().length == 0) {
-            throw new Error("Last name must cannot be empty.")
+            throw new Error("Last name cannot be empty.")
         }
 
         const email = Email.create(params.email)
@@ -65,10 +65,10 @@ export class User {
             {
                 id: crypto.randomUUID(),
                 firstName: params.firstName.trim(),
-                lastName: params.lastName?.trim(),
+                lastName: params.lastName?.trim() || undefined,
                 email: email,
                 password: password,
-                externalAuthId: params.externalAuthId,
+                externalAuthId: params.externalAuthId || undefined,
                 status: UserStatus.ACTIVE,
                 role: params.role as UserRoles || UserRoles.USER,
                 createdAt: now,
@@ -198,9 +198,9 @@ export class User {
         this.props.firstName = params.firstName
 
         if (params.lastName && params.lastName.trim().length == 0) {
-            throw new Error("Last name must cannot be empty.")
+            throw new Error("Last name cannot be empty.")
         }
-        this.props.lastName = params.lastName
+        this.props.lastName = params.lastName || undefined
 
         this.props.email = Email.create(params.email)
         this.props.password = params.password ? await Password.create(params.password, hasher) : undefined
