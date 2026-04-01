@@ -256,8 +256,8 @@ export class User {
         this.props.deletedAt = now
     }
 
-
-
-
-
+    // utility methods
+    toObject(): UserProps {
+        return { ...this.props }
+    }
 }
