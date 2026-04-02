@@ -162,7 +162,7 @@ export class User {
         const password = await Password.create(newPassword, hasher)
 
         this.props.password = password
-        this.props.updatedAt = new Date()
+        this.markAsUpdated()
     }
 
     async resetPassword(newPassword: string, hasher: IPasswordHasher): Promise<void> {
@@ -177,7 +177,7 @@ export class User {
         const password = await Password.create(newPassword, hasher)
 
         this.props.password = password
-        this.props.updatedAt = new Date()
+        this.markAsUpdated()
     }
 
     // transforming guest to user
@@ -208,7 +208,7 @@ export class User {
 
         this.props.role = UserRoles.USER
 
-        this.props.updatedAt = new Date()
+        this.markAsUpdated()
     }
 
     promoteToAdmin(): void {
@@ -222,7 +222,7 @@ export class User {
         }
 
         this.props.role = UserRoles.ADMIN
-        this.props.updatedAt = new Date()
+        this.markAsUpdated()
     }
 
     demoteToUser(): void {
@@ -236,7 +236,7 @@ export class User {
         }
 
         this.props.role = UserRoles.USER
-        this.props.updatedAt = new Date()
+        this.markAsUpdated()
     }
 
     // deleting user (soft delete: update a flag i.e status to say DELETED)
@@ -259,5 +259,9 @@ export class User {
     // utility methods
     toObject(): UserProps {
         return { ...this.props }
+    }
+
+    private markAsUpdated(): void {
+        this.props.updatedAt = new Date()
     }
 }
