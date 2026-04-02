@@ -46,9 +46,9 @@ export class User {
         }
 
         // lastName is optional, so we check if it exist, if so then check length after trimming
-        if (params.lastName && params.lastName.trim().length == 0) {
-            throw new Error("Last name cannot be empty.")
-        }
+        // if (params.lastName && params.lastName.trim().length == 0) {
+        //     throw new Error("Last name cannot be empty.")
+        // }
 
         const email = Email.create(params.email)
         const password = params.password ? await Password.create(params.password, hasher) : undefined
@@ -197,9 +197,9 @@ export class User {
         }
         this.props.firstName = params.firstName
 
-        if (params.lastName && params.lastName.trim().length == 0) {
-            throw new Error("Last name cannot be empty.")
-        }
+        // if (params.lastName && params.lastName.trim().length == 0) {
+        //     throw new Error("Last name cannot be empty.")
+        // }
         this.props.lastName = params.lastName || undefined
 
         this.props.email = Email.create(params.email)
