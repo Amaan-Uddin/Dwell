@@ -22,11 +22,11 @@ export class House {
         description?: string
         createdBy: string
     }): House {
-        if (!params.name || params.name.trim().length == 0) {
+        if (!params.name || params.name.trim().length === 0) {
             throw new Error("House must have a name.")
         }
 
-        if (!params.createdBy || params.createdBy.trim().length == 0) {
+        if (!params.createdBy || params.createdBy.trim().length === 0) {
             throw new Error("Creator of house must be provided.")
         }
 
@@ -34,7 +34,7 @@ export class House {
 
         return new House({
             id: crypto.randomUUID(),
-            name: params.name,
+            name: params.name.trim(),
             description: params.description?.trim() || undefined,
             ownedBy: params.createdBy,
             status: HouseStatus.ACTIVE,
@@ -67,4 +67,66 @@ export class House {
         return this.props.status
     }
 
+    // Business Query methods
+    isActive(): boolean {
+        return this.props.status === HouseStatus.ACTIVE
+    }
+    isAbandoned(): boolean {
+        return this.props.status === HouseStatus.ABANDONED
+    }
+    isArchived(): boolean {
+        return this.props.status === HouseStatus.ARCHIVED
+    }
+
+    updateName(newName: string): void {
+        if (!newName || newName.trim().length == 0) {
+            throw new Error("Provide new name.")
+        }
+        this.props.name = newName.trim()
+        this.markAsUpdated()
+    }
+
+    updateDescription(newDescription: string): void {
+        if (!newDescription || newDescription.trim().length === 0) {
+            this.props.description = undefined
+        } else {
+            this.props.description = newDescription.trim()
+        }
+        this.markAsUpdated()
+    }
+
+    private markAsUpdated(): void {
+        this.props.updatedAt = new Date()
+    }
+
+    updateStatusToAbandoned(): void {
+        if (this.isAbandoned()) {
+            throw new Error("House is already abandoned.")
+        }
+        if (this.isArchived()) {
+            throw new Error("Cannot abandon archived house.")
+        }
+
+        this.props.status = HouseStatus.ABANDONED
+        this.markAsUpdated()
+    }
+    updateStatusToArchived(): void {
+        if (this.isArchived()) {
+            throw new Error("House is already archived.")
+        }
+        if (this.isActive()) {
+            throw new Error("Cannot archive active house.")
+        }
+
+        this.props.status = HouseStatus.ARCHIVED
+        this.markAsUpdated()
+    }
+    updateStatusToActive(): void {
+        if (this.isActive()) {
+            throw new Error("House is already active.")
+        }
+
+        this.props.status = HouseStatus.ACTIVE
+        this.markAsUpdated()
+    }
 }
