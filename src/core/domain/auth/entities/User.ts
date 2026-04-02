@@ -41,12 +41,12 @@ export class User {
     }, hasher: IPasswordHasher): Promise<User> {
 
         // firstName is required so we must ensure it exist and check its length after trimming
-        if (!params.firstName || params.firstName.trim().length == 0) {
+        if (!params.firstName || params.firstName.trim().length === 0) {
             throw new Error("First name must not be empty.")
         }
 
         // lastName is optional, so we check if it exist, if so then check length after trimming
-        // if (params.lastName && params.lastName.trim().length == 0) {
+        // if (params.lastName && params.lastName.trim().length === 0) {
         //     throw new Error("Last name cannot be empty.")
         // }
 
@@ -192,12 +192,12 @@ export class User {
             throw new Error("Not a guest, cannot be promoted to a user.")
         }
 
-        if (!params.firstName || params.firstName.trim().length == 0) {
+        if (!params.firstName || params.firstName.trim().length === 0) {
             throw new Error("First name must not be empty.")
         }
         this.props.firstName = params.firstName
 
-        // if (params.lastName && params.lastName.trim().length == 0) {
+        // if (params.lastName && params.lastName.trim().length === 0) {
         //     throw new Error("Last name cannot be empty.")
         // }
         this.props.lastName = params.lastName || undefined
