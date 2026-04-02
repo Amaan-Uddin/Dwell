@@ -20,14 +20,14 @@ export class House {
     static create(params: {
         name: string,
         description?: string
-        createdBy: string
+        ownedBy: string
     }): House {
         if (!params.name || params.name.trim().length === 0) {
             throw new Error("House must have a name.")
         }
 
-        if (!params.createdBy || params.createdBy.trim().length === 0) {
-            throw new Error("Creator of house must be provided.")
+        if (!params.ownedBy || params.ownedBy.trim().length === 0) {
+            throw new Error("Owner of house must be provided.")
         }
 
         const now = new Date()
@@ -36,7 +36,7 @@ export class House {
             id: crypto.randomUUID(),
             name: params.name.trim(),
             description: params.description?.trim() || undefined,
-            ownedBy: params.createdBy,
+            ownedBy: params.ownedBy.trim(),
             status: HouseStatus.ACTIVE,
             createdAt: now,
             updatedAt: now
@@ -127,6 +127,31 @@ export class House {
         }
 
         this.props.status = HouseStatus.ACTIVE
+        this.markAsUpdated()
+    }
+
+    transferOwnership(currentOwner: string, newOwner: string): void {
+        if (this.isAbandoned() || this.isArchived()) {
+            throw new Error("House must be active before transferring ownership.")
+        }
+
+        if (!currentOwner || currentOwner.trim().length === 0) {
+            throw new Error("Current owner must be provided for transferring of ownership")
+        }
+
+        if (!newOwner || newOwner.trim().length === 0) {
+            throw new Error("New owner must be provided for transferring of ownership.")
+        }
+
+        if (currentOwner !== this.ownedBy) {
+            throw new Error("Current owner mismatch.")
+        }
+
+        if (newOwner === this.ownedBy) {
+            throw new Error("User already is the owner.")
+        }
+
+        this.props.ownedBy = newOwner.trim()
         this.markAsUpdated()
     }
 }
