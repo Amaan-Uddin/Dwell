@@ -22,21 +22,21 @@ export class House {
         description?: string
         ownedBy: string
     }): House {
-        if (!params.name || params.name.trim().length === 0) {
-            throw new Error("House must have a name.")
+        if (!params.name?.trim()) {
+            throw new Error("House name must not be empty.")
         }
 
-        if (!params.ownedBy || params.ownedBy.trim().length === 0) {
-            throw new Error("Owner of house must be provided.")
+        if (!params.ownedBy?.trim()) {
+            throw new Error("Owner must not be empty.")
         }
 
         const now = new Date()
 
         return new House({
             id: crypto.randomUUID(),
-            name: params.name.trim(),
-            description: params.description?.trim() || undefined,
-            ownedBy: params.ownedBy.trim(),
+            name: params.name,
+            description: params.description,
+            ownedBy: params.ownedBy,
             status: HouseStatus.ACTIVE,
             createdAt: now,
             updatedAt: now
@@ -79,19 +79,19 @@ export class House {
     }
 
     updateName(newName: string): void {
-        if (!newName || newName.trim().length == 0) {
-            throw new Error("Provide new name.")
+        if (!newName?.trim()) {
+            throw new Error("New house name cannot be empty.")
         }
-        this.props.name = newName.trim()
+        this.props.name = newName
         this.markAsUpdated()
     }
 
     updateDescription(newDescription: string): void {
-        if (!newDescription || newDescription.trim().length === 0) {
-            this.props.description = undefined
-        } else {
-            this.props.description = newDescription.trim()
+        if (!newDescription?.trim()) {
+            throw new Error("New description must not be empty.")
         }
+
+        this.props.description = newDescription
         this.markAsUpdated()
     }
 
@@ -135,11 +135,11 @@ export class House {
             throw new Error("House must be active before transferring ownership.")
         }
 
-        if (!currentOwner || currentOwner.trim().length === 0) {
+        if (!currentOwner?.trim()) {
             throw new Error("Current owner must be provided for transferring of ownership")
         }
 
-        if (!newOwner || newOwner.trim().length === 0) {
+        if (!newOwner?.trim()) {
             throw new Error("New owner must be provided for transferring of ownership.")
         }
 
@@ -151,7 +151,7 @@ export class House {
             throw new Error("User already is the owner.")
         }
 
-        this.props.ownedBy = newOwner.trim()
+        this.props.ownedBy = newOwner
         this.markAsUpdated()
     }
 }
