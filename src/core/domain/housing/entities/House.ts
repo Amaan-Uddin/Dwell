@@ -1,4 +1,4 @@
-enum HouseStatus {
+export enum HouseStatus {
     ACTIVE = "ACTIVE",
     ABANDONED = "ABANDONED",
     ARCHIVED = "ARCHIVED"
