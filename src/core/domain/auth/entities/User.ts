@@ -41,7 +41,7 @@ export class User {
     }, hasher: IPasswordHasher): Promise<User> {
 
         // firstName is required so we must ensure it exist and check its length after trimming
-        if (!params.firstName || params.firstName.trim().length === 0) {
+        if (!params.firstName?.trim()) {
             throw new Error("First name must not be empty.")
         }
 
@@ -64,13 +64,13 @@ export class User {
         return new User(
             {
                 id: crypto.randomUUID(),
-                firstName: params.firstName.trim(),
-                lastName: params.lastName?.trim() || undefined,
+                firstName: params.firstName,
+                lastName: params.lastName,
                 email: email,
                 password: password,
-                externalAuthId: params.externalAuthId || undefined,
+                externalAuthId: params.externalAuthId,
                 status: UserStatus.ACTIVE,
-                role: params.role as UserRoles || UserRoles.USER,
+                role: params.role as UserRoles,
                 createdAt: now,
                 updatedAt: now
             }
@@ -192,7 +192,7 @@ export class User {
             throw new Error("Not a guest, cannot be promoted to a user.")
         }
 
-        if (!params.firstName || params.firstName.trim().length === 0) {
+        if (!params.firstName?.trim()) {
             throw new Error("First name must not be empty.")
         }
         this.props.firstName = params.firstName
@@ -200,11 +200,11 @@ export class User {
         // if (params.lastName && params.lastName.trim().length === 0) {
         //     throw new Error("Last name cannot be empty.")
         // }
-        this.props.lastName = params.lastName || undefined
+        this.props.lastName = params.lastName
 
         this.props.email = Email.create(params.email)
         this.props.password = params.password ? await Password.create(params.password, hasher) : undefined
-        this.props.externalAuthId = params.externalAuthId ?? undefined
+        this.props.externalAuthId = params.externalAuthId
 
         this.props.role = UserRoles.USER
 
