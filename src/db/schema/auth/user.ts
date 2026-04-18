@@ -1,6 +1,6 @@
 import { sql, SQL } from "drizzle-orm"
 import { integer, varchar, uniqueIndex, AnyPgColumn, timestamp } from "drizzle-orm/pg-core"
-import { authSchema } from ".."
+import { authSchema } from "./schema"
 
 /**
  * ACTIVE - user account is active and in use
