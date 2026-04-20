@@ -53,6 +53,7 @@ export class User {
                 id: crypto.randomUUID(),
                 firstName: params.firstName,
                 lastName: params.lastName,
+                fullName: params.lastName?.trim() ? `${params.firstName} ${params.lastName}` : params.firstName,
                 email: params.email,
                 password: params.password,
                 externalAuthId: params.externalAuthId,
@@ -149,6 +150,7 @@ export class User {
 
         this.props.firstName = params.firstName
         this.props.lastName = params.lastName
+        this.props.fullName = params.lastName?.trim() ? `${params.firstName} ${params.lastName}` : params.firstName
         this.props.email = params.email
         this.props.password = params.password
         this.props.externalAuthId = params.externalAuthId
