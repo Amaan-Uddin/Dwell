@@ -1,7 +1,7 @@
 import { integer, timestamp } from "drizzle-orm/pg-core"
 import { user } from "../auth/user"
 import { house } from "./house"
-import { housingSchema } from ".."
+import { housingSchema } from "./schema"
 
 const residentRoles = housingSchema.enum("resident_roles", ["OWNER", "MEMBER"])
 

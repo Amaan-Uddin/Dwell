@@ -1,5 +1,5 @@
 import { integer, varchar, text, timestamp } from "drizzle-orm/pg-core"
-import { housingSchema } from ".."
+import { housingSchema } from "./schema"
 import { user } from "../auth/user"
 
 /**
