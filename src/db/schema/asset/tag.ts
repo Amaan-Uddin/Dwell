@@ -1,5 +1,5 @@
 import { integer, varchar, timestamp } from "drizzle-orm/pg-core"
-import { assetSchema } from ".."
+import { assetSchema } from "./schema"
 import { inventory } from "./inventory"
 
 export const tag = assetSchema.table("tag", {

@@ -1,6 +1,6 @@
 import { integer, timestamp } from "drizzle-orm/pg-core"
 import { house } from "../housing/house"
-import { assetSchema } from ".."
+import { assetSchema } from "./schema"
 
 export const inventory = assetSchema.table("inventory", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),

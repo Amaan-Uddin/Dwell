@@ -1,7 +1,7 @@
 import { integer, primaryKey } from "drizzle-orm/pg-core"
 import { item } from "./item"
 import { tag } from "./tag"
-import { assetSchema } from ".."
+import { assetSchema } from "./schema"
 
 export const item_tag = assetSchema.table("item_to_tag", {
     itemId: integer().references(() => item.id).notNull(),
