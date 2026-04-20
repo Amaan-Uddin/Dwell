@@ -56,4 +56,33 @@ export class Resident {
         })
     }
 
+    // reconstitute the resident object from persistence
+    static reconstitute(props: ResidentProps) {
+        return new Resident({ ...props })
+    }
+
+    // Getters
+    get id(): string {
+        return this.props.id
+    }
+    get userId(): string {
+        return this.props.userId
+    }
+    get houseId(): string {
+        return this.props.houseId
+    }
+    get status(): string {
+        return this.props.status
+    }
+    get role(): string {
+        return this.props.role
+    }
+
+    isOwner(): boolean {
+        return this.props.role === ResidentRole.OWNER
+    }
+    isMember(): boolean {
+        return this.props.role === ResidentRole.MEMBER
+    }
+
 }
