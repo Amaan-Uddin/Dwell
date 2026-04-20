@@ -1,5 +1,5 @@
 import { integer, timestamp, jsonb, bigserial } from "drizzle-orm/pg-core"
-import { systemSchema } from ".."
+import { systemSchema } from "./schema"
 import { user } from "../auth/user"
 import { item } from "../asset/item"
 import { inventory } from "../asset/inventory"
