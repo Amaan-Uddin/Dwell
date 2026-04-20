@@ -3,7 +3,7 @@ import path from "path"
 
 export default defineConfig({
     test: {
-        setupFiles: []
+        setupFiles: ["./test/setup.ts"]
     },
     resolve: {
         alias: {
