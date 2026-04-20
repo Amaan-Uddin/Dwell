@@ -1,18 +1,25 @@
 export interface IPasswordHasher {
-    hash(plainText: string): Promise<string>
-    compare(plainText: string, hash: string): Promise<boolean>
+    hash(plainText: string): string
+    compare(plainText: string, hash: string): boolean
 }
 
 export class Password {
     private constructor(private readonly hashValue: string) { }
 
+    /**
+     * @deprecated Use `createFromHash()` method which accepts a hash string
+     */
     static async create(value: string, hasher: IPasswordHasher): Promise<Password> {
         this.validate(value)
         const hashedValue = await hasher.hash(value)
         return new Password(hashedValue)
     }
 
-    private static validate(value: string): void {
+    static createFromHash(hash: string): Password {
+        return new Password(hash)
+    }
+
+    static validate(value: string): void {
         if (!value || value.trim().length == 0) {
             throw new Error("Password cannot be empty.")
         }
@@ -39,6 +46,9 @@ export class Password {
         return new Password(hash)
     }
 
+    /**
+     * @deprecated method no long in use
+     */
     async verify(value: string, hasher: IPasswordHasher): Promise<boolean> {
         return await hasher.compare(value, this.hashValue)
     }
