@@ -6,7 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+
+    "db:dev:up": "docker compose -f docker-compose.yml --env-file .env.dev up -d --wait",
+    "db:dev:down": "docker compose -f docker-compose.yml down",
+    "db:dev:log": "docker compose -f docker-compose.yml logs postgres_dev",
+    "db:dev:reset": "docker compose -f docker-compose.yml down -v",
+
+    "db:test:up": "docker compose -f docker-compose.test.yml --env-file .env.test up -d --wait",
+    "db:test:down": "docker compose -f docker-compose.test.yml down",
+    "db:test:reset": "docker compose -f docker-compose.test.yml down -v",
+
+    "test": "npm run db:test:up && vitest run && npm run db:test:down",
+    "test:watch": "npm run db:test:up && trap 'npm run db:test:down' EXIT && vitest"   
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -21,6 +33,7 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
