@@ -1,5 +1,5 @@
 {
-  "id": "ffe32e7d-38e1-45b6-b3ec-e95a034b9a5c",
+  "id": "26747fba-e785-416a-bb39-f963270f1257",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -10,20 +10,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "user_id_seq",
-            "schema": "auth",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "notNull": true
         },
         "firstName": {
           "name": "firstName",
@@ -39,13 +28,9 @@
         },
         "fullName": {
           "name": "fullName",
-          "type": "varchar(60)",
+          "type": "varchar(61)",
           "primaryKey": false,
-          "notNull": true,
-          "generated": {
-            "as": "\"auth\".\"user\".\"firstName\" || ' ' || \"auth\".\"user\".\"lastName\"",
-            "type": "stored"
-          }
+          "notNull": true
         },
         "email": {
           "name": "email",
@@ -90,7 +75,7 @@
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "deletedAt": {
           "name": "deletedAt",
@@ -124,7 +109,25 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "auth.user_roles": {
+      "name": "user_roles",
+      "schema": "auth",
+      "values": [
+        "ADMIN",
+        "USER",
+        "GUEST"
+      ]
+    },
+    "auth.user_status": {
+      "name": "user_status",
+      "schema": "auth",
+      "values": [
+        "ACTIVE",
+        "DELETED"
+      ]
+    }
+  },
   "schemas": {
     "auth": "auth"
   },

@@ -1,17 +1,19 @@
 CREATE SCHEMA "auth";
 --> statement-breakpoint
+CREATE TYPE "auth"."user_roles" AS ENUM('ADMIN', 'USER', 'GUEST');--> statement-breakpoint
+CREATE TYPE "auth"."user_status" AS ENUM('ACTIVE', 'DELETED');--> statement-breakpoint
 CREATE TABLE "auth"."user" (
-	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "auth"."user_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"id" uuid PRIMARY KEY NOT NULL,
 	"firstName" varchar(30) NOT NULL,
 	"lastName" varchar(30),
-	"fullName" varchar(60) GENERATED ALWAYS AS ("auth"."user"."firstName" || ' ' || "auth"."user"."lastName") STORED NOT NULL,
+	"fullName" varchar(61) NOT NULL,
 	"email" varchar(254) NOT NULL,
 	"password" varchar(256),
 	"externalAuthId" varchar,
 	"status" "auth"."user_status" NOT NULL,
 	"role" "auth"."user_roles" NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp,
+	"updatedAt" timestamp NOT NULL,
 	"deletedAt" timestamp
 );
 --> statement-breakpoint
