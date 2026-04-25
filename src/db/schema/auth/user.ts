@@ -1,17 +1,17 @@
 import { sql, SQL } from "drizzle-orm"
-import { integer, varchar, uniqueIndex, AnyPgColumn, timestamp } from "drizzle-orm/pg-core"
+import { varchar, uniqueIndex, AnyPgColumn, timestamp, uuid } from "drizzle-orm/pg-core"
 import { authSchema } from "./schema"
 
 /**
  * ACTIVE - user account is active and in use
  * DELETED - soft delete, user record is not deleted but the status is now set as delete
  */
-const userStatus = authSchema.enum("user_status", ["ACTIVE", "DELETED"])
+export const userStatus = authSchema.enum("user_status", ["ACTIVE", "DELETED"])
 
-const userRoles = authSchema.enum("user_roles", ["ADMIN", "USER", "GUEST"])
+export const userRoles = authSchema.enum("user_roles", ["ADMIN", "USER", "GUEST"])
 
 export const user = authSchema.table("user", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    id: uuid().primaryKey(),
     firstName: varchar({ length: 30 }).notNull(),
     lastName: varchar({ length: 30 }),
     fullName: varchar({ length: 61 }).notNull(),
@@ -21,12 +21,13 @@ export const user = authSchema.table("user", {
     status: userStatus().notNull(),
     role: userRoles().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp(),
+    updatedAt: timestamp().notNull(),
     deletedAt: timestamp(),
 }, (table) => [
     uniqueIndex("emailUniqueIndex").on(lower(table.email))
 ])
 
+// provides security at multiple entry points, example, direct SQL injection
 export function lower(email: AnyPgColumn): SQL {
     return sql`lower(${email})`
 }
