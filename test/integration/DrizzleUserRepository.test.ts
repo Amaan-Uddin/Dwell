@@ -58,7 +58,7 @@ describe("Drizzle User Repository", () => {
         })
 
         it("should return a null value for no user in db", async () => {
-            const fetchUser = await userRepo.findById("none")
+            const fetchUser = await userRepo.findById(crypto.randomUUID())
             console.log("fetch user:", fetchUser)
 
             expect(fetchUser).toBeNull()
