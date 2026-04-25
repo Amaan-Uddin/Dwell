@@ -1,4 +1,5 @@
 import { User, UserRoles } from "../entities/User"
+
 export interface IUserRepository {
     save(user: User): Promise<User>
     findById(id: string): Promise<User | null>
@@ -9,5 +10,6 @@ export interface IUserRepository {
     findActiveUsers(): Promise<User[]>
     findByRole(role: UserRoles): Promise<User[]>
 
-    delete(id: string): Promise<void>
+    forceDelete(id: string): Promise<void>
+    softDelete(user: User): Promise<string>
 }
