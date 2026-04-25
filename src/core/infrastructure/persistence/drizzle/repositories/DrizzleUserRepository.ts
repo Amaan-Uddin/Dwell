@@ -3,86 +3,106 @@ import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository
 import { Email } from "@/core/domain/auth/value-objects/Email"
 import { Password } from "@/core/domain/auth/value-objects/Password"
 import { Database } from "@/db"
-import { user as UserTb } from "@/db/schema/auth/user"
-import { DrizzleError, DrizzleQueryError, eq } from "drizzle-orm"
+import { UserSelectType, user as UserTb } from "@/db/schema/auth/user"
+import { and, DrizzleError, DrizzleQueryError, eq, isNull, not } from "drizzle-orm"
 
-
-export interface PersistenceUser {
-    id: string
-    firstName: string
-    lastName: string | null
-    fullName: string
-    email: string
-    password: string | null
-    externalAuthId: string | null
-    status: "ACTIVE" | "DELETED"
-    role: "ADMIN" | "USER" | "GUEST"
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-}
 export class DrizzleUserRepository implements IUserRepository {
-
     constructor(private readonly db: Database) { }
 
     async save(user: User): Promise<User> {
-        const userObj = user.toObject()
-        const db_data = {
-            id: userObj.id,
-            firstName: userObj.firstName,
-            lastName: userObj.lastName,
-            fullName: userObj.fullName,
-            email: userObj.email.value,
-            password: userObj.password?.value,
-            externalAuthId: userObj.externalAuthId,
-            status: userObj.status,
-            role: userObj.role,
-            createdAt: userObj.createdAt,
-            updatedAt: userObj.updatedAt,
-            deletedAt: userObj.deletedAt
-        }
+        const db_row = this.toPersistence(user)
         try {
-            const inserted = await this.db.insert(UserTb).values(db_data).onConflictDoUpdate({
+            const inserted = await this.db.insert(UserTb).values(db_row).onConflictDoUpdate({
                 target: UserTb.id,
-                set: db_data
+                set: { ...db_row, createdAt: undefined }
             }).returning()
             return this.toDomain(inserted[0])
         } catch (error) {
-            this.errorLogger(error)
+            this.logError(error, { operation: "save", user: user })
+            throw new Error("Failed to save user data to db.", { cause: error })
         }
-
     }
 
-    delete(id: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    async forceDelete(id: string): Promise<void> {
+        try {
+            if (!id.trim()) throw new Error("Cannot force delete a user without an ID.")
+            const result = await this.db.delete(UserTb)
+                .where(
+                    and(
+                        eq(UserTb.id, id),
+                        eq(UserTb.status, "DELETED"),
+                        not(isNull(UserTb.deletedAt))
+                    )
+                ).returning({ deletedId: UserTb.id, deletedEmail: UserTb.email })
+            console.log(`Deleted user with id=${result[0].deletedId} and email=${result[0].deletedEmail}`)
+        } catch (error) {
+            this.logError(error, { operation: "ForceDelete", id: id })
+            throw new Error(`Failed to force delete user with id=${id}.`, { cause: error })
+        }
+    }
+
+    async softDelete(user: User): Promise<string> {
+        const db_row = this.toPersistence(user)
+        try {
+            const result = await this.db.update(UserTb)
+                .set({ status: db_row.status, updatedAt: db_row.updatedAt, deletedAt: db_row.deletedAt })
+                .where(and(eq(UserTb.id, db_row.id), eq(UserTb.email, db_row.email)))
+                .returning({ deletedId: UserTb.id })
+            return result[0].deletedId
+        } catch (error) {
+            this.logError(error, { operation: "softDelete", user: user })
+            throw new Error("Failed to soft delete user.", { cause: error })
+        }
     }
 
     async findById(id: string): Promise<User | null> {
         try {
-            const fetchData = await this.db.select().from(UserTb).where(eq(UserTb.id, id))
+            if (!id.trim()) throw new Error("Cannot find user without ID.")
+            const fetchData = await this.db.select().from(UserTb).where(eq(UserTb.id, id)).limit(1)
             return fetchData[0] ? this.toDomain(fetchData[0]) : null
         } catch (error) {
-            this.errorLogger(error)
+            this.logError(error, { operation: "findById", id: id })
+            throw new Error(`Failed to find user with id=${id}.`, { cause: error })
         }
     }
 
-    findByEmail(email: string): Promise<User | null> {
-        throw new Error("Method not implemented.");
+    async findByEmail(email: string): Promise<User | null> {
+        try {
+            if (!email.trim()) throw new Error("Cannot find user without email.")
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.email, email)).limit(1)
+            return result[0] ? this.toDomain(result[0]) : null
+        } catch (error) {
+            this.logError(error, { operation: "findByEmail", email: email })
+            throw new Error(`Failed to find user with email=${email}.`, { cause: error })
+        }
     }
 
     findByExternalAuthId(externalAuthId: string): Promise<User | null> {
         throw new Error("Method not implemented.");
     }
 
-    findActiveUsers(): Promise<User[]> {
-        throw new Error("Method not implemented.");
+    async findActiveUsers(): Promise<User[]> {
+        try {
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "ACTIVE"))
+            return result.map((user) => (this.toDomain(user)))
+        } catch (error) {
+            this.logError(error, { operation: "findActiveUsers" })
+            throw new Error("Failed to retrieve active users.", { cause: error })
+        }
     }
 
-    findByRole(role: UserRoles): Promise<User[]> {
-        throw new Error("Method not implemented.");
+    async findByRole(role: UserRoles): Promise<User[]> {
+        try {
+            if (!role) throw new Error("Cannot find user without valid role.")
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.role, role))
+            return result.map((user) => (this.toDomain(user)))
+        } catch (error) {
+            this.logError(error, { operation: "findByRole" })
+            throw new Error(`Failed to find users with role=${role}.`, { cause: error })
+        }
     }
 
-    private toDomain(db_user: PersistenceUser): User {
+    private toDomain(db_user: UserSelectType): User {
         return User.reconstitute({
             id: db_user.id,
             firstName: db_user.firstName,
@@ -99,18 +119,46 @@ export class DrizzleUserRepository implements IUserRepository {
         })
     }
 
-    private errorLogger(error: unknown): never {
-        if (error instanceof DrizzleQueryError) {
-            console.error("Query::", error.query)
-            console.error("Drizzle Error::", error.cause?.message)
-        } else if (error instanceof DrizzleError) {
-            console.error("Drizzle Error::", error.message)
-        } else if (error instanceof Error) {
-            console.error("Unexpected Error::", error.message)
-        } else {
-            console.error("Non-error thrown::", error)
+    private toPersistence(user: User): UserSelectType {
+        const userObj = user.toObject()
+        return {
+            id: userObj.id,
+            firstName: userObj.firstName,
+            lastName: userObj.lastName,
+            fullName: userObj.fullName,
+            email: userObj.email.value,
+            password: userObj.password?.value ?? null,
+            externalAuthId: userObj.externalAuthId,
+            status: userObj.status,
+            role: userObj.role,
+            createdAt: userObj.createdAt,
+            updatedAt: userObj.updatedAt,
+            deletedAt: userObj.deletedAt
         }
-        throw error
     }
 
+    private logError(error: unknown, context: Record<string, unknown>): void {
+
+        const logData = { ...context, timestamp: new Date().toISOString() }
+
+        if (error instanceof DrizzleQueryError) {
+            console.error("Query Error::", {
+                ...logData,
+                query: error.query,
+                message: error.cause?.message
+            })
+        } else if (error instanceof DrizzleError) {
+            console.error("Drizzle Error::", {
+                ...logData,
+                message: error.message
+            })
+        } else if (error instanceof Error) {
+            console.error("Unexpected Error::", {
+                ...logData,
+                message: error.message
+            })
+        } else {
+            console.error("Non-error thrown::", { ...logData, error })
+        }
+    }
 }
