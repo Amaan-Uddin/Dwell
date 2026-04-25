@@ -18,7 +18,10 @@
     "db:test:reset": "docker compose -f docker-compose.test.yml down -v",
 
     "test": "npm run db:test:up && vitest run && npm run db:test:down",
-    "test:watch": "npm run db:test:up && trap 'npm run db:test:down' EXIT && vitest"   
+    "test:watch": "npm run db:test:up && dotenv -e .env.test -- vitest",
+    "vitest": "dotenv -e .env.test -- vitest",
+
+    "migrate": "drizzle-kit generate"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
