@@ -10,7 +10,7 @@ const pool = new Pool({
 export const db = drizzle({ client: pool, schema: schema })
 
 beforeAll(async () => {
-    await migrate(db, { migrationsFolder: "./src/db/migration" })
+    await migrate(db, { migrationsFolder: "./src/db/migrations" })
 })
 
 afterAll(async () => {
