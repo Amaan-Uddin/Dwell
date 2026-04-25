@@ -31,3 +31,5 @@ export const user = authSchema.table("user", {
 export function lower(email: AnyPgColumn): SQL {
     return sql`lower(${email})`
 }
+
+export type UserSelectType = typeof user.$inferSelect
