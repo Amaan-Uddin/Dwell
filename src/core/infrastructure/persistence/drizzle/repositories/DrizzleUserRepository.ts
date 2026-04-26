@@ -41,7 +41,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async softDelete(user: User): Promise<string> {
+    async delete(user: User): Promise<string> {
         const db_row = this.toPersistence(user)
         try {
             const result = await this.db.update(UserTb)
@@ -99,6 +99,16 @@ export class DrizzleUserRepository implements IUserRepository {
         } catch (error) {
             this.logError(error, { operation: "findByRole" })
             throw new Error(`Failed to find users with role=${role}.`, { cause: error })
+        }
+    }
+
+    async findDeletedUsers(): Promise<User[]> {
+        try {
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "DELETED"))
+            return result.map((user) => (this.toDomain(user)))
+        } catch (error) {
+            this.logError(error, { operation: "findSoftDeletedUsers" })
+            throw new Error("Failed to retrieve deleted users.", { cause: error })
         }
     }
 
