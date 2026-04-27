@@ -143,6 +143,15 @@ export class User {
     get role(): UserRoles {
         return this.props.role
     }
+    get createdAt(): Date {
+        return this.props.createdAt
+    }
+    get updatedAt(): Date {
+        return this.props.updatedAt
+    }
+    get deletedAt(): Date | null {
+        return this.props.deletedAt
+    }
 
     isGuest(): boolean {
         return this.props.role === UserRoles.GUEST
