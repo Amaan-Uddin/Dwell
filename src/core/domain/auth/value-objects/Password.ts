@@ -1,6 +1,6 @@
 export interface IPasswordHasher {
-    hash(plainText: string): string
-    compare(plainText: string, hash: string): boolean
+    hash(plainText: string): string | Promise<string>
+    compare(plainText: string, hash: string): boolean | Promise<boolean>
 }
 
 export class Password {
