@@ -11,6 +11,6 @@ export interface IUserRepository {
     findByRole(role: UserRoles): Promise<User[]>
 
     forceDelete(id: string): Promise<void>
-    delete(user: User): Promise<string>
+    delete(user: User): Promise<User>
     findDeletedUsers(): Promise<User[]>
 }
