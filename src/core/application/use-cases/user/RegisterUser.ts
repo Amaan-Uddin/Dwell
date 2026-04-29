@@ -1,6 +1,6 @@
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
 import { RegisterUserDTO } from "../../dtos/user/RegisterUserDTO"
-import { UserResponseDTO } from "../../dtos/user/UserResponseDTO"
+import { RegisterUserResponseDTO } from "../../dtos/user/UserResponseDTO"
 import { UserMapper } from "../../mappers/user/UserMapper"
 import { User } from "@/core/domain/auth/entities/User"
 import { Email } from "@/core/domain/auth/value-objects/Email"
@@ -12,7 +12,7 @@ export class RegisterUser {
         private hasher: IPasswordHasher
     ) { }
 
-    async execute(dto: RegisterUserDTO): Promise<UserResponseDTO> {
+    async execute(dto: RegisterUserDTO): Promise<RegisterUserResponseDTO> {
         // find if an user with same email id exists or not
         const emailTaken = await this.userRepo.findByEmail(dto.email)
         if (emailTaken) throw new Error("Email already in use.")
@@ -39,6 +39,6 @@ export class RegisterUser {
         const savedUser = await this.userRepo.save(user)
 
         // return a JSON compatible response back to client
-        return UserMapper.toDTO(savedUser)
+        return UserMapper.toRegisterUserDTO(savedUser)
     }
 }

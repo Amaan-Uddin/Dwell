@@ -1,13 +1,13 @@
-export interface UserResponseDTO {
+export interface RegisterUserResponseDTO {
     id: string
-    firstName?: string
-    lastName?: string
     fullName: string
     email: string
-    externalAuthId?: string
-    status?: string
-    role?: string
     createdAt: Date
     updatedAt: Date
-    deletedAt?: Date | null
-} 
+}
+
+export interface DeleteUserResponseDTO {
+    id: string
+    status: string
+    deletedAt: Date
+}
