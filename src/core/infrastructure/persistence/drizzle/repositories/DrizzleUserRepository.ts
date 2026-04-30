@@ -4,7 +4,8 @@ import { Email } from "@/core/domain/auth/value-objects/Email"
 import { Password } from "@/core/domain/auth/value-objects/Password"
 import { Database } from "@/db"
 import { UserSelectType, user as UserTb } from "@/db/schema/auth/user"
-import { and, DrizzleError, DrizzleQueryError, eq, isNull, not } from "drizzle-orm"
+import { and, eq, isNull, not } from "drizzle-orm"
+import { drizzleErrorLogger } from "../utils"
 
 export class DrizzleUserRepository implements IUserRepository {
     constructor(private readonly db: Database) { }
@@ -18,7 +19,7 @@ export class DrizzleUserRepository implements IUserRepository {
             }).returning()
             return this.toDomain(inserted[0])
         } catch (error) {
-            this.logError(error, { operation: "save", user: user })
+            drizzleErrorLogger(error, { operation: "save", user: user })
             throw new Error("Failed to save user data to db.", { cause: error })
         }
     }
@@ -36,7 +37,7 @@ export class DrizzleUserRepository implements IUserRepository {
                 ).returning({ deletedId: UserTb.id, deletedEmail: UserTb.email })
             console.log(`Deleted user with id=${result[0].deletedId} and email=${result[0].deletedEmail}`)
         } catch (error) {
-            this.logError(error, { operation: "ForceDelete", id: id })
+            drizzleErrorLogger(error, { operation: "ForceDelete", id: id })
             throw new Error(`Failed to force delete user with id=${id}.`, { cause: error })
         }
     }
@@ -50,7 +51,7 @@ export class DrizzleUserRepository implements IUserRepository {
                 .returning()
             return this.toDomain(result[0])
         } catch (error) {
-            this.logError(error, { operation: "softDelete", user: user })
+            drizzleErrorLogger(error, { operation: "softDelete", user: user })
             throw new Error("Failed to soft delete user.", { cause: error })
         }
     }
@@ -61,7 +62,7 @@ export class DrizzleUserRepository implements IUserRepository {
             const fetchData = await this.db.select().from(UserTb).where(eq(UserTb.id, id)).limit(1)
             return fetchData[0] ? this.toDomain(fetchData[0]) : null
         } catch (error) {
-            this.logError(error, { operation: "findById", id: id })
+            drizzleErrorLogger(error, { operation: "findById", id: id })
             throw new Error(`Failed to find user with id=${id}.`, { cause: error })
         }
     }
@@ -72,7 +73,7 @@ export class DrizzleUserRepository implements IUserRepository {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.email, email)).limit(1)
             return result[0] ? this.toDomain(result[0]) : null
         } catch (error) {
-            this.logError(error, { operation: "findByEmail", email: email })
+            drizzleErrorLogger(error, { operation: "findByEmail", email: email })
             throw new Error(`Failed to find user with email=${email}.`, { cause: error })
         }
     }
@@ -86,7 +87,7 @@ export class DrizzleUserRepository implements IUserRepository {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "ACTIVE"))
             return result.map((user) => (this.toDomain(user)))
         } catch (error) {
-            this.logError(error, { operation: "findActiveUsers" })
+            drizzleErrorLogger(error, { operation: "findActiveUsers" })
             throw new Error("Failed to retrieve active users.", { cause: error })
         }
     }
@@ -97,7 +98,7 @@ export class DrizzleUserRepository implements IUserRepository {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.role, role))
             return result.map((user) => (this.toDomain(user)))
         } catch (error) {
-            this.logError(error, { operation: "findByRole" })
+            drizzleErrorLogger(error, { operation: "findByRole" })
             throw new Error(`Failed to find users with role=${role}.`, { cause: error })
         }
     }
@@ -107,7 +108,7 @@ export class DrizzleUserRepository implements IUserRepository {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "DELETED"))
             return result.map((user) => (this.toDomain(user)))
         } catch (error) {
-            this.logError(error, { operation: "findSoftDeletedUsers" })
+            drizzleErrorLogger(error, { operation: "findSoftDeletedUsers" })
             throw new Error("Failed to retrieve deleted users.", { cause: error })
         }
     }
@@ -144,31 +145,6 @@ export class DrizzleUserRepository implements IUserRepository {
             createdAt: userObj.createdAt,
             updatedAt: userObj.updatedAt,
             deletedAt: userObj.deletedAt
-        }
-    }
-
-    private logError(error: unknown, context: Record<string, unknown>): void {
-
-        const logData = { ...context, timestamp: new Date().toISOString() }
-
-        if (error instanceof DrizzleQueryError) {
-            console.error("Query Error::", {
-                ...logData,
-                query: error.query,
-                message: error.cause?.message
-            })
-        } else if (error instanceof DrizzleError) {
-            console.error("Drizzle Error::", {
-                ...logData,
-                message: error.message
-            })
-        } else if (error instanceof Error) {
-            console.error("Unexpected Error::", {
-                ...logData,
-                message: error.message
-            })
-        } else {
-            console.error("Non-error thrown::", { ...logData, error })
         }
     }
 }
