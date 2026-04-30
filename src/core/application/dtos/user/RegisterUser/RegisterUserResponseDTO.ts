@@ -5,9 +5,3 @@ export interface RegisterUserResponseDTO {
     createdAt: Date
     updatedAt: Date
 }
-
-export interface DeleteUserResponseDTO {
-    id: string
-    status: string
-    deletedAt: Date
-}
