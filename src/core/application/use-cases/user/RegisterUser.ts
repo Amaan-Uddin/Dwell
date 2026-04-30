@@ -1,10 +1,10 @@
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
-import { RegisterUserDTO } from "../../dtos/user/RegisterUserDTO"
-import { RegisterUserResponseDTO } from "../../dtos/user/UserResponseDTO"
+import { RegisterUserDTO } from "../../dtos/user/RegisterUser/RegisterUserDTO"
 import { UserMapper } from "../../mappers/user/UserMapper"
 import { User } from "@/core/domain/auth/entities/User"
 import { Email } from "@/core/domain/auth/value-objects/Email"
 import { IPasswordHasher, Password } from "@/core/domain/auth/value-objects/Password"
+import { RegisterUserResponseDTO } from "../../dtos/user/RegisterUser/RegisterUserResponseDTO"
 
 export class RegisterUser {
     constructor(
