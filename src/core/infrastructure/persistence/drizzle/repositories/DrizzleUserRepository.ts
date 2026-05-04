@@ -78,6 +78,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     findByExternalAuthId(externalAuthId: string): Promise<User | null> {
         throw new Error("Method not implemented.");
     }
