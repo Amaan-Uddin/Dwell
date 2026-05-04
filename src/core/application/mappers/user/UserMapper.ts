@@ -2,6 +2,7 @@ import { User } from "@/core/domain/auth/entities/User"
 import { RegisterUserResponseDTO } from "../../dtos/user/RegisterUser/RegisterUserResponseDTO"
 import { DeleteUserResponseDTO } from "../../dtos/user/DeleteUser/DeleteUserResponseDTO"
 import { CreateGuestResponseDTO } from "../../dtos/user/CreateGuest/CreateGuestResponseDTO"
+import { GetUserResponseDTO } from "../../dtos/user/GetUser/GetUserResponseDTO"
 
 export class UserMapper {
     static toRegisterUserDTO(user: User): RegisterUserResponseDTO {
@@ -31,6 +32,20 @@ export class UserMapper {
             id: guest.id,
             fullName: guest.fullName,
             sessionId: sessionId
+        }
+    }
+
+    static toGetUserDTO(user: User): GetUserResponseDTO {
+        return {
+            id: user.id,
+            email: user.email.value,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: user.fullName,
+            status: user.status,
+            role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         }
     }
 
