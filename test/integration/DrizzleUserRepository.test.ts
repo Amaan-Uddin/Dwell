@@ -1,5 +1,5 @@
 import { describe, expect, beforeAll, beforeEach, it } from "vitest"
-import { db } from "../setup"
+import { db } from "../globalSetup"
 import { DrizzleUserRepository } from "@/core/infrastructure/persistence/drizzle/repositories/DrizzleUserRepository"
 import { User, UserRoles } from "@/core/domain/auth/entities/User"
 import { Email } from "@/core/domain/auth/value-objects/Email"
@@ -160,7 +160,7 @@ describe("Drizzle User Repository", () => {
         })
     })
 
-    describe.only("Throwing errors", () => {
+    describe("Throwing errors", () => {
         it("should throw an error for passing empty id string", async () => {
             await expect(userRepo.findById("")).rejects.toThrow()
         })
