@@ -4,15 +4,11 @@ export interface IPasswordHasher {
 }
 
 export class Password {
-    private constructor(private readonly hashValue: string) { }
+    private constructor(private readonly hashOrText: string) { }
 
-    /**
-     * @deprecated Use `createFromHash()` method which accepts a hash string
-     */
-    static async create(value: string, hasher: IPasswordHasher): Promise<Password> {
+    static async create(value: string): Promise<Password> {
         this.validate(value)
-        const hashedValue = await hasher.hash(value)
-        return new Password(hashedValue)
+        return new Password(value)
     }
 
     static createFromHash(hash: string): Password {
@@ -42,18 +38,11 @@ export class Password {
         }
     }
 
-    static reconstitute(hash: string): Password {
-        return new Password(hash)
-    }
-
-    /**
-     * @deprecated method no long in use
-     */
-    async verify(value: string, hasher: IPasswordHasher): Promise<boolean> {
-        return await hasher.compare(value, this.hashValue)
+    static reconstitute(hashOrText: string): Password {
+        return new Password(hashOrText)
     }
 
     get value(): string {
-        return this.hashValue
+        return this.hashOrText
     }
 }
