@@ -28,6 +28,13 @@ export default defineConfig({
                 },
                 ...sharedConfig
             }),
+            defineProject({
+                test: {
+                    name: "service",
+                    include: ["test/integration/service/*.test.ts"]
+                },
+                ...sharedConfig
+            })
         ]
     },
 })
