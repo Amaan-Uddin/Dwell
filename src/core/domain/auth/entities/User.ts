@@ -134,7 +134,7 @@ export class User {
     get email(): Email {
         return this.props.email
     }
-    get externalAuth(): string | null {
+    get externalAuthId(): string | null {
         return this.props.externalAuthId
     }
     get status(): UserStatus {
@@ -271,5 +271,64 @@ export class User {
         this.props.status = UserStatus.DELETED
         this.props.updatedAt = now
         this.props.deletedAt = now
+    }
+
+    /**
+     * Update a user first and last name
+     * 
+     * @param params Holds user firstName and lastName
+     * @throws If params.firstName is empty.
+     */
+    updateProfile(params: {
+        firstName: string,
+        lastName?: string,
+    }): void {
+        if (!params.firstName?.trim()) {
+            throw new Error("First Name must not be empty.")
+        }
+        this.props.firstName = params.firstName
+        this.props.lastName = params.lastName ?? null
+        this.props.fullName = params.lastName?.trim() ? `${params.firstName} ${params.lastName}` : params.firstName
+        this.markAsUpdated()
+    }
+
+    /**
+     * Updates user email
+     * 
+     * @param params Holds user email
+     */
+    updateEmail(params: {
+        email: Email
+    }): void {
+        this.props.email = params.email
+        this.markAsUpdated()
+    }
+
+    /**
+     * Updates user externalAuthId
+     * 
+     * @param params Holds user externalAuthId 
+     */
+    updateExternalAuthId(params: {
+        externalAuthId: string
+    }): void {
+        if (!params.externalAuthId?.trim()) {
+            throw new Error("External auth id must not be empty.")
+        }
+
+        this.props.externalAuthId = params.externalAuthId
+        this.markAsUpdated()
+    }
+
+    /**
+     * Updates user password
+     * 
+     * @param params Holds user password
+     */
+    updatePassword(params: {
+        password: Password
+    }): void {
+        this.props.password = params.password
+        this.markAsUpdated()
     }
 }
