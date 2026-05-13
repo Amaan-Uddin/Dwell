@@ -6,7 +6,7 @@ export interface IPasswordHasher {
 export class Password {
     private constructor(private readonly hashOrText: string) { }
 
-    static async create(value: string): Promise<Password> {
+    static create(value: string): Password {
         this.validate(value)
         return new Password(value)
     }
