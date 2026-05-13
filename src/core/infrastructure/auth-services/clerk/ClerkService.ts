@@ -54,8 +54,10 @@ export class ClerkService implements IClerkService {
         const db_row = this.toPersistence(user)
         try {
             if (!db_row.externalAuthId?.trim()) throw new Error("Invalid operation, user is missing externalAuthId.")
+            // TODO verify email address before updating
+            const email = await this.client.emailAddresses.createEmailAddress({ userId: db_row.externalAuthId, emailAddress: db_row.email, verified: true })
             return await this.client.users.updateUser(db_row.externalAuthId, {
-                primaryEmailAddressID: db_row.email
+                primaryEmailAddressID: email.id
             })
         } catch (error) {
             this.errorLog(error, { "operation": "updateUserEmailAddress" })
