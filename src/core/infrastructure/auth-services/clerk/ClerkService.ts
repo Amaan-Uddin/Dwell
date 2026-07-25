@@ -1,6 +1,6 @@
 import { User } from "@/core/domain/auth/entities/User"
 import { User as ClerkUser, SignInToken, Session, ClerkClient } from "@clerk/backend"
-import { IClerkService } from "./IClerkService"
+import { IClerkService, RawSignupData } from "./IClerkService"
 import { UserSelectType } from "@/db/schema/auth/user"
 
 export class ClerkService implements IClerkService {
@@ -20,19 +20,27 @@ export class ClerkService implements IClerkService {
         }
     }
 
-    async createUser(user: User): Promise<ClerkUser> {
-        const db_row = this.toPersistence(user)
+    async createUser(data: RawSignupData): Promise<ClerkUser> {
         try {
             return await this.client.users.createUser({
-                firstName: db_row.firstName,
-                lastName: db_row.lastName ?? undefined, // because db_row.lastName can be string or null
-                emailAddress: [db_row.email],
-                password: db_row.password ?? undefined, // same as before, we use nullish to fallback undefined because clerk does not accept null for optional fields
-                createdAt: db_row.createdAt,
+                firstName: data.firstName,
+                lastName: data.lastName ?? undefined, // because db_row.lastName can be string or undefined
+                emailAddress: [data.emailAddress],
+                password: data.password ?? undefined, // same as before, we use nullish to fallback undefined because clerk does not accept null for optional fields
             })
         } catch (error) {
             this.errorLog(error, { "operation": "createUser" })
             throw new Error("Failed to create user in clerk.", { cause: error })
+        }
+    }
+
+    async fetchUser(userId: string): Promise<ClerkUser> {
+        try {
+            if (!userId?.trim()) throw new Error("Invalid operation, userId is missing.")
+            return await this.client.users.getUser(userId)
+        } catch (error) {
+            this.errorLog(error, { "operation": "fetchUser" })
+            throw new Error("Failed to get user from clerk.", { cause: error })
         }
     }
 
