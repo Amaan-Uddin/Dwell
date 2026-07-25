@@ -3,23 +3,25 @@ import { ClerkService } from "@/core/infrastructure/auth-services/clerk/ClerkSer
 import { createClerkClient, User as ClerkUser } from "@clerk/backend"
 import { User, UserRoles } from "@/core/domain/auth/entities/User"
 import { Email } from "@/core/domain/auth/value-objects/Email"
-import { Password } from "@/core/domain/auth/value-objects/Password"
+// import { Password } from "@/core/domain/auth/value-objects/Password" ----------- we are not using the Password VO for now
+import { RawSignupData } from "@/core/infrastructure/auth-services/clerk/IClerkService"
 
 describe("Clerk Services", () => {
     let clerkService: ClerkService
     let user: User
+    let data: RawSignupData
 
     beforeAll(() => {
         const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
         clerkService = new ClerkService(clerkClient)
 
-        user = User.create({
+        data = {
             firstName: "John",
             lastName: "Doe",
-            email: Email.create("johndoe@email.com"),
-            password: Password.create("SomeReallyLongJohnDoePass@123"),
-            role: UserRoles.USER
-        })
+            emailAddress: "johndoe@email.com",
+            password: "johndoepassword123987"
+        }
+
     })
 
 
@@ -31,7 +33,7 @@ describe("Clerk Services", () => {
         })
 
         it("should create a user in clerk", async () => {
-            const clerkUser = await clerkService.createUser(user)
+            const clerkUser = await clerkService.createUser(data)
             console.log(clerkUser)
             userId = clerkUser.id
 
@@ -46,9 +48,16 @@ describe("Clerk Services", () => {
         let clerkUser: ClerkUser
         let userId: string
         beforeEach(async () => {
-            clerkUser = await clerkService.createUser(user)
+            clerkUser = await clerkService.createUser(data)
             userId = clerkUser.id
-            user.updateExternalAuthId({ externalAuthId: clerkUser.id })
+            user = User.create({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: Email.create(data.emailAddress),
+                externalAuthId: userId,
+                role: UserRoles.USER
+            })
+            // user.updateExternalAuthId({ externalAuthId: clerkUser.id })
         })
         afterEach(async () => {
             await clerkService.deleteUser(userId)
