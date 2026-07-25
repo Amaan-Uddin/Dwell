@@ -10,7 +10,7 @@ export class SessionService implements ISessionService {
 
     async createSession(userId: string, ttl: number = 7 * 24 * 60 * 60): Promise<{ sessionId: string }> {
         const sessionId = crypto.randomBytes(32).toString("base64")
-        const expiresAt = new Date(Date.now() + ttl)
+        const expiresAt = new Date(Date.now() + ttl * 1000)
 
         try {
             await this.db.insert(SessionTb).values({ id: sessionId, userId: userId, expiresAt: expiresAt })
