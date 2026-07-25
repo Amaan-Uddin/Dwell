@@ -78,9 +78,15 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    findByExternalAuthId(externalAuthId: string): Promise<User | null> {
-        throw new Error("Method not implemented.");
+    async findByExternalAuthId(externalAuthId: string): Promise<User | null> {
+        try {
+            if (!externalAuthId.trim()) throw new Error("Cannot find user without externalAuthId.")
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.externalAuthId, externalAuthId)).limit(1)
+            return result[0] ? this.toDomain(result[0]) : null
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findByExternalAuthId", authId: externalAuthId })
+            throw new Error(`Failed to find user with externalAuthId=${externalAuthId}.`, { cause: error })
+        }
     }
 
     async findActiveUsers(): Promise<User[]> {
