@@ -81,7 +81,7 @@ export class User {
      * @returns A guest `User` object.
      */
     static createGuest(params?: {
-        id?: string
+        id: string
     }): User {
         const now = new Date()
         const ID = params?.id ?? randomUUID()
