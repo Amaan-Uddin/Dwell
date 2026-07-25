@@ -3,6 +3,7 @@ import { RegisterUserResponseDTO } from "../../dtos/user/RegisterUser/RegisterUs
 import { DeleteUserResponseDTO } from "../../dtos/user/DeleteUser/DeleteUserResponseDTO"
 import { CreateGuestResponseDTO } from "../../dtos/user/CreateGuest/CreateGuestResponseDTO"
 import { GetUserResponseDTO } from "../../dtos/user/GetUser/GetUserResponseDTO"
+import { UpdateUserResponseDTO } from "../../dtos/user/UpdateUser/UpdateUserResponseDTO"
 
 export class UserMapper {
     static toRegisterUserDTO(user: User): RegisterUserResponseDTO {
@@ -44,6 +45,16 @@ export class UserMapper {
             fullName: user.fullName,
             status: user.status,
             role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        }
+    }
+
+    static toUpdateUserDTO(user: User): UpdateUserResponseDTO {
+        return {
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email.value,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         }
