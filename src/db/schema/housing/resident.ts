@@ -1,4 +1,4 @@
-import { integer, timestamp } from "drizzle-orm/pg-core"
+import { integer, timestamp, uuid } from "drizzle-orm/pg-core"
 import { user } from "../auth/user"
 import { house } from "./house"
 import { housingSchema } from "./schema"
@@ -13,9 +13,9 @@ const residentRoles = housingSchema.enum("resident_roles", ["OWNER", "MEMBER"])
 const residentStatus = housingSchema.enum("resident_status", ["ACTIVE", "LEFT", "REMOVED"])
 
 export const resident = housingSchema.table("resident", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    userId: integer().references(() => user.id).notNull(),
-    houseId: integer().references(() => house.id).notNull(),
+    id: uuid().primaryKey(),
+    userId: uuid().references(() => user.id).notNull(),
+    houseId: uuid().references(() => house.id).notNull(),
     status: residentStatus().notNull(),
     role: residentRoles().notNull(),
     leftAt: timestamp(),

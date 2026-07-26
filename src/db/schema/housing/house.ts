@@ -1,4 +1,4 @@
-import { integer, varchar, text, timestamp } from "drizzle-orm/pg-core"
+import { varchar, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { housingSchema } from "./schema"
 import { user } from "../auth/user"
 
@@ -10,10 +10,10 @@ import { user } from "../auth/user"
 const houseStatus = housingSchema.enum("house_status", ["ACTIVE", "ABANDONED", "ARCHIVED"])
 
 export const house = housingSchema.table("house", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    id: uuid().primaryKey(),
     name: varchar({ length: 256 }).notNull(),
     description: text(),
-    ownedBy: integer().references(() => user.id),
+    ownedBy: uuid().references(() => user.id).notNull(),
     status: houseStatus().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp(),
