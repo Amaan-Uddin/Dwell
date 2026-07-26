@@ -8,6 +8,7 @@ import { SessionService } from "../persistence/drizzle/services/DrizzleSessionSe
 import { GetUser } from "@/core/application/use-cases/user/GetUser"
 import { createClerkClient } from "@clerk/backend"
 import { ClerkService } from "../auth-services/clerk/ClerkService"
+import { UpdateUser } from "@/core/application/use-cases/user/UpdateUser"
 
 const hasher = new PasswordHasher()
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
@@ -20,3 +21,4 @@ export const registerUserUseCase = new RegisterUser(userRepository, hasher)
 export const deleteUserUseCase = new DeleteUser(userRepository)
 export const createGuestUseCase = new CreateGuest(userRepository, sessionService)
 export const getUserUseCase = new GetUser(userRepository, sessionService, clerkService)
+export const updateUserUseCase = new UpdateUser(userRepository, clerkService)
