@@ -1,9 +1,7 @@
-import { integer, timestamp, uuid } from "drizzle-orm/pg-core"
+import { integer, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core"
 import { user } from "../auth/user"
 import { house } from "./house"
 import { housingSchema } from "./schema"
-
-const residentRoles = housingSchema.enum("resident_roles", ["OWNER", "MEMBER"])
 
 /**
  * ACTIVE - resident is a part of a house
@@ -17,10 +15,14 @@ export const resident = housingSchema.table("resident", {
     userId: uuid().references(() => user.id).notNull(),
     houseId: uuid().references(() => house.id).notNull(),
     status: residentStatus().notNull(),
-    role: residentRoles().notNull(),
-    leftAt: timestamp(),
-    removedAt: timestamp(),
     rejoinedCount: integer().default(0).notNull(),
     createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp(),
-})
+    updatedAt: timestamp().notNull(),
+    leftAt: timestamp(),
+    removedAt: timestamp()
+}, (table) => [
+    // ensures that the user can only have ONE resident record per house
+    uniqueIndex("user_house_index").on(table.userId, table.houseId)
+])
+
+export type ResidentSelectType = typeof resident.$inferSelect

@@ -16,5 +16,9 @@ export const house = housingSchema.table("house", {
     ownedBy: uuid().references(() => user.id).notNull(),
     status: houseStatus().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp(),
+    updatedAt: timestamp().notNull(),
+    abandonedAt: timestamp(),
+    archivedAt: timestamp()
 })
+
+export type HouseSelectType = typeof house.$inferSelect
