@@ -24,7 +24,10 @@ export const user = authSchema.table("user", {
     updatedAt: timestamp().notNull(),
     deletedAt: timestamp(),
 }, (table) => [
-    uniqueIndex("emailUniqueIndex").on(lower(table.email))
+    // modify the unique index on email to a partial index, which inforces the unique constraint on active records
+    // we done this to make sure that when a user deletes their account, their status is set to DELETED (i.e soft deletion)
+    // now they can still make a new account with the same email address and unique-ness will be based on their email and condition is that the status should be active. 
+    uniqueIndex("emailUniqueIndex").on(lower(table.email)).where(sql`${table.status}='ACTIVE'`)
 ])
 
 // provides security at multiple entry points, example, direct SQL injection
