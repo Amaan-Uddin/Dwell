@@ -61,7 +61,7 @@ export class User {
                 id: randomUUID(),
                 firstName: params.firstName,
                 lastName: params.lastName ?? null,
-                fullName: params.lastName?.trim() ? `${params.firstName} ${params.lastName}` : params.firstName,
+                fullName: User.generateFullName(params.firstName, params.lastName),
                 email: params.email,
                 password: params.password ?? null,
                 externalAuthId: params.externalAuthId ?? null,
@@ -111,12 +111,16 @@ export class User {
         return new User(props)
     }
 
+    private static generateFullName(firstName: string, lastName?: string | null): string {
+        return lastName?.trim() ? `${firstName} ${lastName}` : firstName
+    }
+
     toObject(): UserProps {
         return { ...this.props }
     }
 
-    private markAsUpdated(): void {
-        this.props.updatedAt = new Date()
+    private markAsUpdated(date: Date = new Date()): void {
+        this.props.updatedAt = date
     }
 
     get id(): string {
@@ -193,13 +197,13 @@ export class User {
             throw new Error("First name must not be empty.")
         }
 
-        if (!params.password && !params.externalAuthId) {
+        if (!params.password?.value && !params.externalAuthId) {
             throw new Error("Password or external auth ID must be provided.")
         }
 
         this.props.firstName = params.firstName
         this.props.lastName = params.lastName ?? null
-        this.props.fullName = params.lastName?.trim() ? `${params.firstName} ${params.lastName}` : params.firstName
+        this.props.fullName = User.generateFullName(params.firstName, params.lastName)
         this.props.email = params.email
         this.props.password = params.password ?? null
         this.props.externalAuthId = params.externalAuthId ?? null
@@ -216,13 +220,11 @@ export class User {
      * @throws If object role is already Admin or if role is Guest
      */
     promoteUserToAdmin(): void {
-        if (!this.isUser()) {
-            if (this.isAdmin()) {
-                throw new Error("User is already an admin.")
-            }
-            if (this.isGuest()) {
-                throw new Error("Guest cannot be promoted to an admin.")
-            }
+        if (this.isAdmin()) {
+            throw new Error("User is already an admin.")
+        }
+        if (this.isGuest()) {
+            throw new Error("Guest cannot be promoted to an admin.")
         }
 
         this.props.role = UserRoles.ADMIN
@@ -237,13 +239,11 @@ export class User {
      * @throws If object role is already a User or is a Guest.
      */
     demoteAdminToUser(): void {
-        if (!this.isAdmin()) {
-            if (this.isUser()) {
-                throw new Error("Already has user role.")
-            }
-            if (this.isGuest()) {
-                throw new Error("Guest cannot be demoted to user.")
-            }
+        if (this.isUser()) {
+            throw new Error("Already has user role.")
+        }
+        if (this.isGuest()) {
+            throw new Error("Guest cannot be demoted to user.")
         }
 
         this.props.role = UserRoles.USER
@@ -269,8 +269,8 @@ export class User {
         const now = new Date()
 
         this.props.status = UserStatus.DELETED
-        this.props.updatedAt = now
         this.props.deletedAt = now
+        this.markAsUpdated(now)
     }
 
     /**
