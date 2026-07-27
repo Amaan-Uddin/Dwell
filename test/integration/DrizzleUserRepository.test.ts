@@ -150,8 +150,8 @@ describe("Drizzle User Repository", () => {
             user1.deleteUser()
             user2.deleteUser()
 
-            await userRepo.delete(user1)
-            await userRepo.delete(user2)
+            await userRepo.save(user1)
+            await userRepo.save(user2)
 
             const response = await userRepo.findDeletedUsers()
             console.log("response after fetching soft deleted users:", response)

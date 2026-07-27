@@ -42,20 +42,6 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async delete(user: User): Promise<User> {
-        const db_row = this.toPersistence(user)
-        try {
-            const result = await this.db.update(UserTb)
-                .set({ status: db_row.status, updatedAt: db_row.updatedAt, deletedAt: db_row.deletedAt })
-                .where(and(eq(UserTb.id, db_row.id), eq(UserTb.email, db_row.email)))
-                .returning()
-            return this.toDomain(result[0])
-        } catch (error) {
-            drizzleErrorLogger(error, { operation: "softDelete", user: user })
-            throw new Error("Failed to soft delete user.", { cause: error })
-        }
-    }
-
     async findById(id: string): Promise<User | null> {
         try {
             if (!id.trim()) throw new Error("Cannot find user without ID.")
