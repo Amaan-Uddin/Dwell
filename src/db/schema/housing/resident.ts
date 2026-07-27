@@ -22,7 +22,7 @@ export const resident = housingSchema.table("resident", {
     houseId: uuid().references(() => house.id).notNull(),
     status: residentStatus().notNull(),
     rejoinedCount: integer().default(0).notNull(),
-    removedStatus: removeStatus(),
+    removeStatus: removeStatus(),
     createdAt: timestamp().defaultNow().notNull(),
     updatedAt: timestamp().notNull(),
     leftAt: timestamp(),
