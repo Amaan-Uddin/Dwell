@@ -60,6 +60,10 @@ export class Resident {
         return new Resident(props)
     }
 
+    toObject(): ResidentProps {
+        return { ...this.props }
+    }
+
     get id(): string {
         return this.props.id
     }
@@ -155,7 +159,7 @@ export class Resident {
             if (this.removeStatus === RemoveStatus.PERM) {
                 throw new Error("User has been permanently banned from the house.")
             }
-           
+
             // if the user was removed temporarily we check the days which has passed since users removal to see if they are allowed to rejoin a house
             if (this.removeStatus === RemoveStatus.TEMP) {
                 const now = new Date()

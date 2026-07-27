@@ -53,6 +53,10 @@ export class House {
         return new House(props)
     }
 
+    toObject(): HouseProps {
+        return { ...this.props }
+    }
+
     get id(): string {
         return this.props.id
     }
