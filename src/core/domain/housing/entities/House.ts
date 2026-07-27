@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto"
+
 export enum HouseStatus {
     ACTIVE = "ACTIVE",
     ABANDONED = "ABANDONED",
@@ -7,11 +9,13 @@ export enum HouseStatus {
 export interface HouseProps {
     id: string
     name: string
-    description?: string
+    description: string | null
     ownedBy: string
     status: HouseStatus
     createdAt: Date
     updatedAt: Date
+    abandonedAt: Date | null
+    archivedAt: Date | null
 }
 
 export class House {
@@ -23,7 +27,7 @@ export class House {
         ownedBy: string
     }): House {
         if (!params.name?.trim()) {
-            throw new Error("House name must not be empty.")
+            throw new Error("House name cannot be empty.")
         }
 
         if (!params.ownedBy?.trim()) {
@@ -33,13 +37,15 @@ export class House {
         const now = new Date()
 
         return new House({
-            id: crypto.randomUUID(),
+            id: randomUUID(),
             name: params.name,
-            description: params.description,
+            description: params.description ?? null,
             ownedBy: params.ownedBy,
             status: HouseStatus.ACTIVE,
             createdAt: now,
-            updatedAt: now
+            updatedAt: now,
+            abandonedAt: null,
+            archivedAt: null
         })
     }
 
@@ -55,7 +61,7 @@ export class House {
         return this.props.name
     }
 
-    get description(): string | undefined {
+    get description(): string | null {
         return this.props.description
     }
 
@@ -67,7 +73,22 @@ export class House {
         return this.props.status
     }
 
-    // Business Query methods
+    get createdAt(): Date {
+        return this.props.createdAt
+    }
+
+    get updatedAt(): Date {
+        return this.props.updatedAt
+    }
+
+    get abandonedAt(): Date | null {
+        return this.props.abandonedAt
+    }
+
+    get archivedAt(): Date | null {
+        return this.props.archivedAt
+    }
+
     isActive(): boolean {
         return this.props.status === HouseStatus.ACTIVE
     }
