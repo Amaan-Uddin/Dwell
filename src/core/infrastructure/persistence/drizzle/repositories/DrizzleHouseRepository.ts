@@ -55,6 +55,31 @@ export class DrizzleHouseRepository implements IHouseRepository {
         }
     }
 
+    async findHouseCount(ownerId: string): Promise<number> {
+        try {
+            if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
+            const count = await this.db.$count(HouseTb, eq(HouseTb.ownedBy, ownerId))
+            return count
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findUserHouseCount", ownerId: ownerId })
+            throw new Error(`Failed to fetch count of houses owner with ID=${ownerId}`, { cause: error })
+        }
+    }
+
+    async findHouseCountForUpdate(ownerId: string): Promise<number> {
+        try {
+            if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
+
+            // This tells Postgres: "lock every row this SELECT touches, until the current transaction commits or rolls back."
+            const rows = await this.db.select({ id: HouseTb.id }).from(HouseTb).where(eq(HouseTb.ownedBy, ownerId)).for("update")
+
+            return rows.length
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findUserHouseCount", ownerId: ownerId })
+            throw new Error(`Failed to fetch count of houses owner with ID=${ownerId}`, { cause: error })
+        }
+    }
+
     private toDomain(db_house: HouseSelectType): House {
 
         if (!Object.values(HouseStatus).includes(db_house.status as HouseStatus)) {
