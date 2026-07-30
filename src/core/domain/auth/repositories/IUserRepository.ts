@@ -1,4 +1,4 @@
-import { User, UserRoles } from "../entities/User"
+import { User, UserRoles, UserStatus } from "../entities/User"
 
 export interface IUserRepository {
     save(user: User): Promise<User>
@@ -7,9 +7,8 @@ export interface IUserRepository {
     findByEmail(email: string): Promise<User | null>
     findByExternalAuthId(externalAuthId: string): Promise<User | null>
 
-    findActiveUsers(): Promise<User[]>
+    findByStatus(status: UserStatus): Promise<User[]>
     findByRole(role: UserRoles): Promise<User[]>
 
     forceDelete(id: string): Promise<void>
-    findDeletedUsers(): Promise<User[]>
 }

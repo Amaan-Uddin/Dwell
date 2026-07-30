@@ -13,11 +13,11 @@ export class DrizzleUserRepository implements IUserRepository {
     async save(user: User): Promise<User> {
         const db_row = this.toPersistence(user)
         try {
-            const inserted = await this.db.insert(UserTb).values(db_row).onConflictDoUpdate({
+            const [row] = await this.db.insert(UserTb).values(db_row).onConflictDoUpdate({
                 target: UserTb.id,
                 set: { ...db_row, createdAt: undefined }
             }).returning()
-            return this.toDomain(inserted[0])
+            return this.toDomain(row)
         } catch (error) {
             drizzleErrorLogger(error, { operation: "save", user: user })
             throw new Error("Failed to save user data to db.", { cause: error })
@@ -25,8 +25,8 @@ export class DrizzleUserRepository implements IUserRepository {
     }
 
     async forceDelete(id: string): Promise<void> {
+        if (!id.trim()) throw new Error("Cannot force delete a user without an ID.")
         try {
-            if (!id.trim()) throw new Error("Cannot force delete a user without an ID.")
             const result = await this.db.delete(UserTb)
                 .where(
                     and(
@@ -43,10 +43,10 @@ export class DrizzleUserRepository implements IUserRepository {
     }
 
     async findById(id: string): Promise<User | null> {
+        if (!id.trim()) throw new Error("Cannot find user without ID.")
         try {
-            if (!id.trim()) throw new Error("Cannot find user without ID.")
-            const fetchData = await this.db.select().from(UserTb).where(eq(UserTb.id, id)).limit(1)
-            return fetchData[0] ? this.toDomain(fetchData[0]) : null
+            const [row] = await this.db.select().from(UserTb).where(eq(UserTb.id, id))
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findById", id: id })
             throw new Error(`Failed to find user with id=${id}.`, { cause: error })
@@ -54,10 +54,10 @@ export class DrizzleUserRepository implements IUserRepository {
     }
 
     async findByEmail(email: string): Promise<User | null> {
+        if (!email.trim()) throw new Error("Cannot find user without email.")
         try {
-            if (!email.trim()) throw new Error("Cannot find user without email.")
-            const result = await this.db.select().from(UserTb).where(eq(UserTb.email, email)).limit(1)
-            return result[0] ? this.toDomain(result[0]) : null
+            const [row] = await this.db.select().from(UserTb).where(eq(UserTb.email, email))
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByEmail", email: email })
             throw new Error(`Failed to find user with email=${email}.`, { cause: error })
@@ -65,29 +65,30 @@ export class DrizzleUserRepository implements IUserRepository {
     }
 
     async findByExternalAuthId(externalAuthId: string): Promise<User | null> {
+        if (!externalAuthId.trim()) throw new Error("Cannot find user without externalAuthId.")
         try {
-            if (!externalAuthId.trim()) throw new Error("Cannot find user without externalAuthId.")
-            const result = await this.db.select().from(UserTb).where(eq(UserTb.externalAuthId, externalAuthId)).limit(1)
-            return result[0] ? this.toDomain(result[0]) : null
+            const [row] = await this.db.select().from(UserTb).where(eq(UserTb.externalAuthId, externalAuthId)).limit(1)
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByExternalAuthId", authId: externalAuthId })
             throw new Error(`Failed to find user with externalAuthId=${externalAuthId}.`, { cause: error })
         }
     }
 
-    async findActiveUsers(): Promise<User[]> {
+    async findByStatus(status: UserStatus): Promise<User[]> {
+        if (!status) throw new Error("Cannot find user without valid status.")
         try {
-            const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "ACTIVE"))
+            const result = await this.db.select().from(UserTb).where(eq(UserTb.status, status))
             return result.map((user) => (this.toDomain(user)))
         } catch (error) {
-            drizzleErrorLogger(error, { operation: "findActiveUsers" })
-            throw new Error("Failed to retrieve active users.", { cause: error })
+            drizzleErrorLogger(error, { operation: "findByStatus" })
+            throw new Error(`Failed to retrieve users with status=${status}.`, { cause: error })
         }
     }
 
     async findByRole(role: UserRoles): Promise<User[]> {
+        if (!role) throw new Error("Cannot find user without valid role.")
         try {
-            if (!role) throw new Error("Cannot find user without valid role.")
             const result = await this.db.select().from(UserTb).where(eq(UserTb.role, role))
             return result.map((user) => (this.toDomain(user)))
         } catch (error) {
@@ -96,17 +97,13 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findDeletedUsers(): Promise<User[]> {
-        try {
-            const result = await this.db.select().from(UserTb).where(eq(UserTb.status, "DELETED"))
-            return result.map((user) => (this.toDomain(user)))
-        } catch (error) {
-            drizzleErrorLogger(error, { operation: "findSoftDeletedUsers" })
-            throw new Error("Failed to retrieve deleted users.", { cause: error })
-        }
-    }
-
     private toDomain(db_user: UserSelectType): User {
+        if (!Object.values(UserStatus).includes(db_user.status as UserStatus)) {
+            throw new Error(`Database corruption detected: Invalid user status ${db_user.status}`)
+        }
+        if (!Object.values(UserRoles).includes(db_user.role as UserRoles)) {
+            throw new Error(`Database corruption detected: Invalid user role ${db_user.role}`)
+        }
         return User.reconstitute({
             id: db_user.id,
             firstName: db_user.firstName,
