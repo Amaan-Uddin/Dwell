@@ -11,11 +11,11 @@ export class DrizzleResidentRepository implements IResidentRepository {
     async save(resident: Resident): Promise<Resident> {
         const db_row = this.toPersistence(resident)
         try {
-            const row = await this.db.insert(ResidentTb).values(db_row).onConflictDoUpdate({
+            const [row] = await this.db.insert(ResidentTb).values(db_row).onConflictDoUpdate({
                 target: ResidentTb.id,
                 set: { ...db_row, createdAt: undefined }
             }).returning()
-            return this.toDomain(row[0])
+            return this.toDomain(row)
         } catch (error) {
             drizzleErrorLogger(error, { operation: "save" })
             throw new Error("Failed to save resident data to db.", { cause: error })
@@ -23,10 +23,10 @@ export class DrizzleResidentRepository implements IResidentRepository {
     }
 
     async findById(id: string): Promise<Resident | null> {
+        if (!id.trim()) throw new Error("Cannot find resident without ID.")
         try {
-            if (!id.trim()) throw new Error("Cannot find resident without ID.")
-            const result = await this.db.select().from(ResidentTb).where(eq(ResidentTb.id, id)).limit(1)
-            return result[0] ? this.toDomain(result[0]) : null
+            const [row] = await this.db.select().from(ResidentTb).where(eq(ResidentTb.id, id))
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findById" })
             throw new Error(`Failed to fetch resident by ID=${id}`, { cause: error })
@@ -34,8 +34,8 @@ export class DrizzleResidentRepository implements IResidentRepository {
     }
 
     async findByUserId(userId: string): Promise<Resident[]> {
+        if (!userId.trim()) throw new Error("Cannot find residents without user ID.")
         try {
-            if (!userId.trim()) throw new Error("Cannot find residents without user ID.")
             const result = await this.db.select().from(ResidentTb).where(eq(ResidentTb.userId, userId))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
@@ -45,8 +45,8 @@ export class DrizzleResidentRepository implements IResidentRepository {
     }
 
     async findByHouseId(houseId: string): Promise<Resident[]> {
+        if (!houseId.trim()) throw new Error("Cannot find residents without house ID.")
         try {
-            if (!houseId.trim()) throw new Error("Cannot find residents without house ID.")
             const result = await this.db.select().from(ResidentTb).where(eq(ResidentTb.houseId, houseId))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
@@ -56,11 +56,23 @@ export class DrizzleResidentRepository implements IResidentRepository {
     }
 
     async findByUserAndHouseId(userId: string, houseId: string): Promise<Resident | null> {
+        if (!userId.trim()) throw new Error("Cannot find resident without user ID.")
+        if (!houseId.trim()) throw new Error("Cannot find resident without house ID.")
         try {
-            if (!userId.trim()) throw new Error("Cannot find resident without user ID.")
-            if (!houseId.trim()) throw new Error("Cannot find resident without house ID.")
-            const result = await this.db.select().from(ResidentTb).where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId))).limit(1)
-            return result[0] ? this.toDomain(result[0]) : null
+            const [row] = await this.db.select().from(ResidentTb).where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId)))
+            return row ? this.toDomain(row) : null
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findByUserAndHouseId" })
+            throw new Error(`Failed to fetch resident by user ID=${userId} and house ID=${houseId}`, { cause: error })
+        }
+    }
+
+    async findByUserAndHouseIdForUpdate(userId: string, houseId: string): Promise<Resident | null> {
+        if (!userId.trim()) throw new Error("Cannot find resident without user ID.")
+        if (!houseId.trim()) throw new Error("Cannot find resident without house ID.")
+        try {
+            const [row] = await this.db.select().from(ResidentTb).where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId))).for("update")
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByUserAndHouseId" })
             throw new Error(`Failed to fetch resident by user ID=${userId} and house ID=${houseId}`, { cause: error })
@@ -71,11 +83,9 @@ export class DrizzleResidentRepository implements IResidentRepository {
         if (!Object.values(ResidentStatus).includes(db_resident.status as ResidentStatus)) {
             throw new Error(`Database corruption detected: Invalid resident status ${db_resident.status}`)
         }
-
         if (db_resident.removeStatus && !Object.values(RemoveStatus).includes(db_resident.removeStatus as RemoveStatus)) {
             throw new Error(`Database corruption detected: Invalid resident remove status ${db_resident.removeStatus}`)
         }
-
         return Resident.reconstitute({
             id: db_resident.id,
             userId: db_resident.userId,

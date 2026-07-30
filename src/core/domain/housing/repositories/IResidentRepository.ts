@@ -11,4 +11,5 @@ export interface IResidentRepository {
 
     // this method prevents duplicate active residents and is crucial for enforcing the resident rejoin business rule
     findByUserAndHouseId(userId: string, houseId: string): Promise<Resident | null>
+    findByUserAndHouseIdForUpdate(userId: string, houseId: string): Promise<Resident | null> // row-locked method
 }
