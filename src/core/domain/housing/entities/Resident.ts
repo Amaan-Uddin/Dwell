@@ -149,7 +149,7 @@ export class Resident {
         this.markAsUpdated(now)
     }
 
-    residentRejoins(): void {
+    rejoin(): void {
         if (this.isActive()) {
             throw new Error("User is already active.")
         }
