@@ -11,11 +11,11 @@ export class DrizzleHouseRepository implements IHouseRepository {
     async save(house: House): Promise<House> {
         const db_row = this.toPersistence(house)
         try {
-            const row = await this.db.insert(HouseTb).values(db_row).onConflictDoUpdate({
+            const [row] = await this.db.insert(HouseTb).values(db_row).onConflictDoUpdate({
                 target: HouseTb.id,
                 set: { ...db_row, createdAt: undefined }
             }).returning()
-            return this.toDomain(row[0])
+            return this.toDomain(row)
         } catch (error) {
             drizzleErrorLogger(error, { operation: "save", house: house })
             throw new Error("Failed to save house data to db.", { cause: error })
@@ -23,10 +23,10 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     async findById(id: string): Promise<House | null> {
+        if (!id.trim()) throw new Error("Cannot find house without an ID.")
         try {
-            if (!id.trim()) throw new Error("Cannot find house without an ID.")
-            const result = await this.db.select().from(HouseTb).where(eq(HouseTb.id, id)).limit(1)
-            return result[0] ? this.toDomain(result[0]) : null
+            const [row] = await this.db.select().from(HouseTb).where(eq(HouseTb.id, id))
+            return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findById", id: id })
             throw new Error(`Failed to fetch house with ID=${id}.`, { cause: error })
@@ -34,8 +34,8 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     async findByOwner(ownerId: string): Promise<House[]> {
+        if (!ownerId.trim()) throw new Error("Cannot find house without ownerId.")
         try {
-            if (!ownerId.trim()) throw new Error("Cannot find house without ownerId.")
             const result = await this.db.select().from(HouseTb).where(eq(HouseTb.ownedBy, ownerId))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
@@ -45,8 +45,8 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     async findByStatus(status: HouseStatus): Promise<House[]> {
+        if (!status.trim()) throw new Error("Cannot find house without a valid status.")
         try {
-            if (!status.trim()) throw new Error("Cannot find house without a status.")
             const result = await this.db.select().from(HouseTb).where(eq(HouseTb.status, status))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
@@ -56,10 +56,9 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     async findHouseCount(ownerId: string): Promise<number> {
+        if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
         try {
-            if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
-            const count = await this.db.$count(HouseTb, eq(HouseTb.ownedBy, ownerId))
-            return count
+            return await this.db.$count(HouseTb, eq(HouseTb.ownedBy, ownerId))
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findUserHouseCount", ownerId: ownerId })
             throw new Error(`Failed to fetch count of houses owner with ID=${ownerId}`, { cause: error })
@@ -67,12 +66,10 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     async findHouseCountForUpdate(ownerId: string): Promise<number> {
+        if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
         try {
-            if (!ownerId.trim()) throw new Error("Cannot count number of houses without ownerId.")
-
             // This tells Postgres: "lock every row this SELECT touches, until the current transaction commits or rolls back."
             const rows = await this.db.select({ id: HouseTb.id }).from(HouseTb).where(eq(HouseTb.ownedBy, ownerId)).for("update")
-
             return rows.length
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findUserHouseCount", ownerId: ownerId })
@@ -81,11 +78,9 @@ export class DrizzleHouseRepository implements IHouseRepository {
     }
 
     private toDomain(db_house: HouseSelectType): House {
-
         if (!Object.values(HouseStatus).includes(db_house.status as HouseStatus)) {
             throw new Error(`Database corruption detected: Invalid house status ${db_house.status}`)
         }
-
         return House.reconstitute({
             id: db_house.id,
             name: db_house.name,
