@@ -12,12 +12,12 @@ export class CreateHouse {
 
     async execute(dto: CreateHouseDTO): Promise<CreateHouseResponseDTO> {
         // validate the userId which we receive from the client
-        if (!dto.ownedBy.trim()) {
+        if (!dto.userId.trim()) {
             throw new Error("Cannot create house without a user.")
         }
 
         // check if the user exists or not
-        const user = await this.userRepo.findById(dto.ownedBy)
+        const user = await this.userRepo.findById(dto.userId)
         if (!user) {
             throw new Error("User does not exist.", { cause: "USER_NOT_FOUND" })
         }
@@ -32,19 +32,19 @@ export class CreateHouse {
 
         // everything inside here runs in ONE transaction
         const savedHouse = await this.uow.execute(async ({ houseRepo, residentRepo }) => {
-            const houseCount = await houseRepo.findHouseCountForUpdate(dto.ownedBy)
+            const houseCount = await houseRepo.findHouseCountForUpdate(dto.userId)
             if (houseCount >= MAX_HOUSE) {
                 throw new Error(`User already has reached the max limit of ${MAX_HOUSE} houses.`, { cause: "MAX_HOUSE_LIMIT" })
             }
 
             // create a house domain object
-            const house = House.create({ name: dto.name, description: dto.description, ownedBy: dto.ownedBy })
+            const house = House.create({ name: dto.name, description: dto.description, ownedBy: dto.userId })
 
             // save the house to our db using the transaction
             const savedHouse = await houseRepo.save(house)
 
             // we also have to create the house owner resident record and save it
-            const resident = Resident.create({ userId: dto.ownedBy, houseId: savedHouse.id })
+            const resident = Resident.create({ userId: dto.userId, houseId: savedHouse.id })
             await residentRepo.save(resident)
 
             return savedHouse
