@@ -2,7 +2,7 @@ import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository
 import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository";
 import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository";
 import { JoinHouseDTO } from "../../dtos/resident/JoinHouse/JoinHouseDTO";
-import { Resident } from "@/core/domain/housing/entities/Resident";
+import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident";
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork";
 
 export class JoinHouse {
@@ -46,7 +46,7 @@ export class JoinHouse {
                 throw new Error("User is already a resident of this house.", { cause: "ALREADY_RESIDENT" })
             }
             if (!resident) {
-                resident = Resident.create({ userId: user.id, houseId: house.id })
+                resident = Resident.create({ userId: user.id, houseId: house.id, role: ResidentRole.MEMBER })
             }
 
             if (house.isAbandoned()) {

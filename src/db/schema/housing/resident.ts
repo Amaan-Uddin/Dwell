@@ -16,11 +16,18 @@ const residentStatus = housingSchema.enum("resident_status", ["ACTIVE", "LEFT", 
  */
 const removeStatus = housingSchema.enum("resident_remove_status", ["TEMP", "PERM"])
 
+/**
+ * OWNER - role given to the owner of the house
+ * MEMBER - role given to the non-authoritative member of the house
+ */
+const residentRole = housingSchema.enum("resident_role", ["OWNER", "MEMBER"])
+
 export const resident = housingSchema.table("resident", {
     id: uuid().primaryKey(),
     userId: uuid().references(() => user.id).notNull(),
     houseId: uuid().references(() => house.id).notNull(),
     status: residentStatus().notNull(),
+    role: residentRole().notNull(),
     rejoinedCount: integer().default(0).notNull(),
     removeStatus: removeStatus(),
     createdAt: timestamp().defaultNow().notNull(),

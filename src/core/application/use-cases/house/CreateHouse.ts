@@ -5,7 +5,7 @@ import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository
 import { House } from "@/core/domain/housing/entities/House"
 import { HouseMapper } from "../../mappers/house/HouseMapper"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
-import { Resident } from "@/core/domain/housing/entities/Resident"
+import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 
 export class CreateHouse {
     constructor(private houseRepo: IHouseRepository, private userRepo: IUserRepository, private uow: IUnitOfWork) { }
@@ -44,7 +44,7 @@ export class CreateHouse {
             const savedHouse = await houseRepo.save(house)
 
             // we also have to create the house owner resident record and save it
-            const resident = Resident.create({ userId: dto.userId, houseId: savedHouse.id })
+            const resident = Resident.create({ userId: dto.userId, houseId: savedHouse.id, role: ResidentRole.OWNER })
             await residentRepo.save(resident)
 
             return savedHouse

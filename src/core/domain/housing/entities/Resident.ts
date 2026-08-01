@@ -11,11 +11,17 @@ export enum RemoveStatus {
     PERM = "PERM"
 }
 
+export enum ResidentRole {
+    OWNER = "OWNER",
+    MEMBER = "MEMBER"
+}
+
 export interface ResidentProps {
     id: string
     userId: string
     houseId: string
     status: ResidentStatus
+    role: ResidentRole
     removeStatus: RemoveStatus | null
     rejoinedCount: number
     createdAt: Date
@@ -30,6 +36,7 @@ export class Resident {
     static create(params: {
         userId: string,
         houseId: string,
+        role: ResidentRole
     }) {
         if (!params.userId?.trim()) {
             throw new Error("User ID must not be empty.")
@@ -46,6 +53,7 @@ export class Resident {
             userId: params.userId,
             houseId: params.houseId,
             status: ResidentStatus.ACTIVE,
+            role: params.role,
             removeStatus: null,
             rejoinedCount: 0,
             createdAt: now,
@@ -80,6 +88,10 @@ export class Resident {
         return this.props.status
     }
 
+    get role(): ResidentRole {
+        return this.props.role
+    }
+
     get removeStatus(): RemoveStatus | null {
         return this.props.removeStatus
     }
@@ -98,6 +110,14 @@ export class Resident {
 
     get removedAt(): Date | null {
         return this.props.removedAt
+    }
+
+    isOwner(): boolean {
+        return this.props.role === ResidentRole.OWNER
+    }
+
+    isMember(): boolean {
+        return this.props.role === ResidentRole.MEMBER
     }
 
     isActive(): boolean {
@@ -187,5 +207,31 @@ export class Resident {
         }
 
         throw new Error("User is in an invalid state to rejoin.")
+    }
+
+    makeOwner(): void {
+        if (this.isOwner()) {
+            throw new Error("Resident is already an owner.")
+        }
+
+        if (!this.isActive()) {
+            throw new Error("Resident must be in the house to become an owner.")
+        }
+
+        this.props.role = ResidentRole.OWNER
+        this.markAsUpdated()
+    }
+
+    makeMember(): void {
+        if (this.isMember()) {
+            throw new Error("Resident is already a member.")
+        }
+
+        if (!this.isActive()) {
+            throw new Error("Resident must be in the house to become a member.")
+        }
+
+        this.props.role = ResidentRole.MEMBER
+        this.markAsUpdated()
     }
 }

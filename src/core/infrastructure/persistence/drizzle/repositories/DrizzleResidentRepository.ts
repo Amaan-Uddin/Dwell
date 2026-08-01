@@ -1,4 +1,4 @@
-import { Resident, ResidentStatus, RemoveStatus } from "@/core/domain/housing/entities/Resident"
+import { Resident, ResidentStatus, RemoveStatus, ResidentRole } from "@/core/domain/housing/entities/Resident"
 import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
 import { Database } from "@/db"
 import { ResidentSelectType, resident as ResidentTb } from "@/db/schema/housing/resident"
@@ -86,11 +86,15 @@ export class DrizzleResidentRepository implements IResidentRepository {
         if (db_resident.removeStatus && !Object.values(RemoveStatus).includes(db_resident.removeStatus as RemoveStatus)) {
             throw new Error(`Database corruption detected: Invalid resident remove status ${db_resident.removeStatus}`)
         }
+        if (!Object.values(ResidentRole).includes(db_resident.role as ResidentRole)) {
+            throw new Error(`Database corruption detected: Invalid resident role ${db_resident.role}`)
+        }
         return Resident.reconstitute({
             id: db_resident.id,
             userId: db_resident.userId,
             houseId: db_resident.houseId,
             status: db_resident.status as ResidentStatus,
+            role: db_resident.role as ResidentRole,
             removeStatus: db_resident.removeStatus as RemoveStatus | null,
             rejoinedCount: db_resident.rejoinedCount,
             createdAt: db_resident.createdAt,
@@ -107,6 +111,7 @@ export class DrizzleResidentRepository implements IResidentRepository {
             userId: residentObj.userId,
             houseId: residentObj.houseId,
             status: residentObj.status,
+            role: residentObj.role,
             removeStatus: residentObj.removeStatus,
             rejoinedCount: residentObj.rejoinedCount,
             createdAt: residentObj.createdAt,
