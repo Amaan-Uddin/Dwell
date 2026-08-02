@@ -79,6 +79,17 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
+    async findResidentCountForUpdate(houseId: string): Promise<number> {
+        if (!houseId.trim()) throw new Error("Cannot count residents in house without houseId")
+        try {
+            const rows = await this.db.select({ id: ResidentTb.id }).from(ResidentTb).where(and(eq(ResidentTb.houseId, houseId), eq(ResidentTb.status, ResidentStatus.ACTIVE))).for("update")
+            return rows.length
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findResidentCount" })
+            throw new Error(`Failed to fetch resident count for house ID=${houseId}`, { cause: error })
+        }
+    }
+
     toDomain(db_resident: ResidentSelectType): Resident {
         if (!Object.values(ResidentStatus).includes(db_resident.status as ResidentStatus)) {
             throw new Error(`Database corruption detected: Invalid resident status ${db_resident.status}`)
