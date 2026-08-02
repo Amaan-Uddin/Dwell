@@ -136,7 +136,7 @@ export class Resident {
         this.props.updatedAt = date
     }
 
-    residentLeaves(): void {
+    leave(): void {
         if (this.hasLeft()) {
             throw new Error("User has already left the house.")
         }
@@ -152,7 +152,7 @@ export class Resident {
         this.markAsUpdated(now)
     }
 
-    removeResident(status: RemoveStatus = RemoveStatus.TEMP): void {
+    remove(status: RemoveStatus = RemoveStatus.TEMP): void {
         if (this.isRemoved()) {
             throw new Error("User has already been removed.")
         }
