@@ -120,8 +120,8 @@ export class House {
         this.markAsUpdated()
     }
 
-    private markAsUpdated(): void {
-        this.props.updatedAt = new Date()
+    private markAsUpdated(date: Date = new Date()): void {
+        this.props.updatedAt = date
     }
 
     updateStatusToAbandoned(): void {
@@ -132,8 +132,10 @@ export class House {
             throw new Error("Cannot abandon archived house.")
         }
 
+        const now = new Date()
         this.props.status = HouseStatus.ABANDONED
-        this.markAsUpdated()
+        this.props.abandonedAt = now
+        this.markAsUpdated(now)
     }
     updateStatusToArchived(): void {
         if (this.isArchived()) {
@@ -143,8 +145,10 @@ export class House {
             throw new Error("Cannot archive active house.")
         }
 
+        const now = new Date()
         this.props.status = HouseStatus.ARCHIVED
-        this.markAsUpdated()
+        this.props.archivedAt = now
+        this.markAsUpdated(now)
     }
     updateStatusToActive(): void {
         if (this.isActive()) {
