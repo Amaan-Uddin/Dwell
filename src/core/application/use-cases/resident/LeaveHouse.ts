@@ -11,27 +11,25 @@ export class LeaveHouse {
         private uow: IUnitOfWork) { }
 
     async execute(dto: LeaveHouseDTO): Promise<void> {
+        if (!dto.residentId.trim()) throw new Error("Resident ID is required for this operation.")
+        if (!dto.houseId.trim()) throw new Error("House ID is required for this operation.")
 
-        if (!dto.residentId.trim()) {
-            throw new Error("Resident ID is required for this operation.")
-        }
+        const residentCheck = await this.residentRepo.findById(dto.residentId)
+        if (!residentCheck) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
 
-        if (!dto.houseId.trim()) {
-            throw new Error("House ID is required for this operation.")
-        }
-
-        const resident = await this.residentRepo.findById(dto.residentId)
-        if (!resident) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
-        if (!resident.isActive()) throw new Error("Resident is currently not in house.", { cause: "RESIDENT_INACTIVE" })
-        if (resident.role === ResidentRole.OWNER) {
-            throw new Error("Owner must transfer ownership before leaving the house.", { cause: "OWNER_CANNOT_LEAVE" })
-        }
-
-        const house = await this.houseRepo.findById(dto.houseId)
-        if (!house) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
-        if (!house.isActive()) throw new Error("House is currently in-active or has no members.", { cause: "HOUSE_INACTIVE" })
+        const houseCheck = await this.houseRepo.findById(dto.houseId)
+        if (!houseCheck) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
 
         await this.uow.execute(async ({ residentRepo, houseRepo }) => {
+            const house = await houseRepo.findByIdForUpdate(dto.houseId)
+            if (!house) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
+            if (!house.isActive()) throw new Error("House is currently in-active or has no members.", { cause: "HOUSE_INACTIVE" })
+
+            const resident = await residentRepo.findById(dto.residentId)
+            if (!resident) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
+            if (!resident.isActive()) throw new Error("Resident is currently not in house.", { cause: "RESIDENT_INACTIVE" })
+            if (resident.role === ResidentRole.OWNER) throw new Error("Owner must transfer ownership before leaving the house.", { cause: "OWNER_CANNOT_LEAVE" })
+
             resident.leave()
             await residentRepo.save(resident)
 

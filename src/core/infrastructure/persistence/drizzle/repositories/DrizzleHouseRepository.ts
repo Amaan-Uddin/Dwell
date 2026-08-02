@@ -33,6 +33,17 @@ export class DrizzleHouseRepository implements IHouseRepository {
         }
     }
 
+    async findByIdForUpdate(id: string): Promise<House | null> {
+        if (!id.trim()) throw new Error("Cannot find house without an ID.")
+        try {
+            const [row] = await this.db.select().from(HouseTb).where(eq(HouseTb.id, id)).for("update")
+            return row ? this.toDomain(row) : null
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "findById", id: id })
+            throw new Error(`Failed to fetch house with ID=${id}.`, { cause: error })
+        }
+    }
+
     async findByOwner(ownerId: string): Promise<House[]> {
         if (!ownerId.trim()) throw new Error("Cannot find house without ownerId.")
         try {
