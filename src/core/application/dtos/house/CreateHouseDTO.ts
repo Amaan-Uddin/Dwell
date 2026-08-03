@@ -10,3 +10,13 @@ export const CreateHouseSchema = z.object({
 })
 
 export type CreateHouseDTO = z.infer<typeof CreateHouseSchema>
+
+export interface CreateHouseResponseDTO {
+    id: string
+    name: string
+    description: string | null
+    ownedBy: string
+    status: string
+    createdAt: Date
+    updatedAt: Date
+}

@@ -1,5 +1,5 @@
 import { House } from "@/core/domain/housing/entities/House"
-import { CreateHouseResponseDTO } from "../../dtos/house/CreateHouse/CreateHouseResponseDTO"
+import { CreateHouseResponseDTO } from "../dtos/house/CreateHouseDTO"
 
 export class HouseMapper {
     static toCreateHouseDTO(house: House): CreateHouseResponseDTO {

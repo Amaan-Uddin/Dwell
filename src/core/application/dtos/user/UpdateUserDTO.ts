@@ -29,3 +29,11 @@ export const UpdateUserPasswordSchema = z.object({
 export type UpdateUserDetailDTO = z.infer<typeof UpdateUserDetailSchema>
 export type UpdateUserEmailDTO = z.infer<typeof UpdateUserEmailSchema>
 export type UpdateUserPasswordDTO = z.infer<typeof UpdateUserPasswordSchema>
+
+export interface UpdateUserResponseDTO {
+    id: string
+    fullName: string
+    email: string
+    createdAt: Date
+    updatedAt: Date
+}

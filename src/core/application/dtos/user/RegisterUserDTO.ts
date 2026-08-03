@@ -19,5 +19,10 @@ export const RegisterUserSchema = z.object({
 
 export type RegisterUserDTO = z.infer<typeof RegisterUserSchema>
 
-
-
+export interface RegisterUserResponseDTO {
+    id: string
+    fullName: string
+    email: string
+    createdAt: Date
+    updatedAt: Date
+}

@@ -1,7 +1,7 @@
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
-import { DeleteUserDTO } from "../../dtos/user/DeleteUser/DeleteUserDTO"
-import { UserMapper } from "../../mappers/user/UserMapper"
-import { DeleteUserResponseDTO } from "../../dtos/user/DeleteUser/DeleteUserResponseDTO"
+import { DeleteUserDTO } from "../../dtos/user/DeleteUserDTO"
+import { UserMapper } from "../../mappers/UserMapper"
+import { DeleteUserResponseDTO } from "../../dtos/user/DeleteUserDTO"
 
 export class DeleteUser {
     constructor(private userRepo: IUserRepository) { }

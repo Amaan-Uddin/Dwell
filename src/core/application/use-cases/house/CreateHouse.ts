@@ -1,9 +1,9 @@
 import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository"
-import { CreateHouseDTO } from "../../dtos/house/CreateHouse/CreateHouseDTO"
-import { CreateHouseResponseDTO } from "../../dtos/house/CreateHouse/CreateHouseResponseDTO"
+import { CreateHouseDTO } from "../../dtos/house/CreateHouseDTO"
+import { CreateHouseResponseDTO } from "../../dtos/house/CreateHouseDTO"
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
 import { House } from "@/core/domain/housing/entities/House"
-import { HouseMapper } from "../../mappers/house/HouseMapper"
+import { HouseMapper } from "../../mappers/HouseMapper"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 

@@ -1,7 +1,7 @@
 import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository"
 import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
-import { LeaveHouseDTO } from "../../dtos/resident/LeaveHouse/LeaveHouseDTO"
+import { LeaveHouseDTO } from "../../dtos/resident/LeaveHouseDTO"
 import { ResidentRole } from "@/core/domain/housing/entities/Resident"
 
 export class LeaveHouse {

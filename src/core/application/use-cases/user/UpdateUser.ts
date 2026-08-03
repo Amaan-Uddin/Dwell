@@ -1,8 +1,8 @@
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
-import { UpdateUserDetailDTO, UpdateUserEmailDTO } from "../../dtos/user/UpdateUser/UpdateUserDTO"
-import { UpdateUserResponseDTO } from "../../dtos/user/UpdateUser/UpdateUserResponseDTO"
+import { UpdateUserDetailDTO, UpdateUserEmailDTO } from "../../dtos/user/UpdateUserDTO"
+import { UpdateUserResponseDTO } from "../../dtos/user/UpdateUserDTO"
 import { IClerkService } from "@/core/infrastructure/auth-services/clerk/IClerkService"
-import { UserMapper } from "../../mappers/user/UserMapper"
+import { UserMapper } from "../../mappers/UserMapper"
 import { Email } from "@/core/domain/auth/value-objects/Email"
 
 export class UpdateUser {

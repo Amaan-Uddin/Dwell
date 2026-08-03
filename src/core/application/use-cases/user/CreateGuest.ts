@@ -1,8 +1,8 @@
 import { User } from "@/core/domain/auth/entities/User";
 import { ISessionService } from "@/core/infrastructure/persistence/drizzle/services/ISessionService";
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository";
-import { UserMapper } from "../../mappers/user/UserMapper";
-import { CreateGuestResponseDTO } from "../../dtos/user/CreateGuest/CreateGuestResponseDTO";
+import { UserMapper } from "../../mappers/UserMapper";
+import { CreateGuestResponseDTO } from "../../dtos/user/CreateGuestDTO";
 
 export class CreateGuest {
     constructor(private userRepo: IUserRepository, private sessionService: ISessionService) { }

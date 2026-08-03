@@ -1,9 +1,9 @@
 import { User } from "@/core/domain/auth/entities/User"
-import { RegisterUserResponseDTO } from "../../dtos/user/RegisterUser/RegisterUserResponseDTO"
-import { DeleteUserResponseDTO } from "../../dtos/user/DeleteUser/DeleteUserResponseDTO"
-import { CreateGuestResponseDTO } from "../../dtos/user/CreateGuest/CreateGuestResponseDTO"
-import { GetUserResponseDTO } from "../../dtos/user/GetUser/GetUserResponseDTO"
-import { UpdateUserResponseDTO } from "../../dtos/user/UpdateUser/UpdateUserResponseDTO"
+import { RegisterUserResponseDTO } from "../dtos/user/RegisterUserDTO"
+import { DeleteUserResponseDTO } from "../dtos/user/DeleteUserDTO"
+import { CreateGuestResponseDTO } from "../dtos/user/CreateGuestDTO"
+import { GetUserResponseDTO } from "../dtos/user/GetUserDTO"
+import { UpdateUserResponseDTO } from "../dtos/user/UpdateUserDTO"
 
 export class UserMapper {
     static toRegisterUserDTO(user: User): RegisterUserResponseDTO {
