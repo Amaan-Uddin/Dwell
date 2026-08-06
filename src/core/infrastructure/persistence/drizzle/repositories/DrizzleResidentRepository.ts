@@ -8,7 +8,7 @@ import { and, eq } from "drizzle-orm"
 export class DrizzleResidentRepository implements IResidentRepository {
     constructor(private readonly db: Database) { }
 
-    async save(resident: Resident): Promise<Resident> {
+    async save({ resident }: { resident: Resident }): Promise<Resident> {
         const db_row = this.toPersistence(resident)
         try {
             const [row] = await this.db.insert(ResidentTb).values(db_row).onConflictDoUpdate({
@@ -22,10 +22,18 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
-    async findById(id: string): Promise<Resident | null> {
+    async findById({ id, forUpdate = false }: { id: string, forUpdate?: boolean }): Promise<Resident | null> {
         if (!id.trim()) throw new Error("Cannot find resident without ID.")
         try {
-            const [row] = await this.db.select().from(ResidentTb).where(eq(ResidentTb.id, id))
+            let query = this.db
+                .select()
+                .from(ResidentTb)
+                .where(eq(ResidentTb.id, id))
+                .$dynamic() // the query is now dynamic allowing us to add more clauses to the query later.
+
+            if (forUpdate) query = query.for("update")
+
+            const [row] = await query
             return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findById" })
@@ -33,10 +41,13 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
-    async findByUserId(userId: string): Promise<Resident[]> {
+    async findByUserId({ userId }: { userId: string }): Promise<Resident[]> {
         if (!userId.trim()) throw new Error("Cannot find residents without user ID.")
         try {
-            const result = await this.db.select().from(ResidentTb).where(eq(ResidentTb.userId, userId))
+            const result = await this.db
+                .select()
+                .from(ResidentTb)
+                .where(eq(ResidentTb.userId, userId))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByUserId" })
@@ -44,10 +55,13 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
-    async findByHouseId(houseId: string): Promise<Resident[]> {
+    async findByHouseId({ houseId }: { houseId: string }): Promise<Resident[]> {
         if (!houseId.trim()) throw new Error("Cannot find residents without house ID.")
         try {
-            const result = await this.db.select().from(ResidentTb).where(eq(ResidentTb.houseId, houseId))
+            const result = await this.db
+                .select()
+                .from(ResidentTb)
+                .where(eq(ResidentTb.houseId, houseId))
             return result.map((row) => this.toDomain(row))
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByHouseId" })
@@ -55,11 +69,18 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
-    async findByUserAndHouseId(userId: string, houseId: string): Promise<Resident | null> {
+    async findByUserAndHouseId({ userId, houseId, forUpdate = false }: { userId: string, houseId: string, forUpdate?: boolean }): Promise<Resident | null> {
         if (!userId.trim()) throw new Error("Cannot find resident without user ID.")
         if (!houseId.trim()) throw new Error("Cannot find resident without house ID.")
         try {
-            const [row] = await this.db.select().from(ResidentTb).where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId)))
+            let query = this.db
+                .select()
+                .from(ResidentTb)
+                .where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId)))
+                .$dynamic()
+            if (forUpdate) query = query.for("update")
+
+            const [row] = await query
             return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findByUserAndHouseId" })
@@ -67,22 +88,17 @@ export class DrizzleResidentRepository implements IResidentRepository {
         }
     }
 
-    async findByUserAndHouseIdForUpdate(userId: string, houseId: string): Promise<Resident | null> {
-        if (!userId.trim()) throw new Error("Cannot find resident without user ID.")
-        if (!houseId.trim()) throw new Error("Cannot find resident without house ID.")
-        try {
-            const [row] = await this.db.select().from(ResidentTb).where(and(eq(ResidentTb.userId, userId), eq(ResidentTb.houseId, houseId))).for("update")
-            return row ? this.toDomain(row) : null
-        } catch (error) {
-            drizzleErrorLogger(error, { operation: "findByUserAndHouseId" })
-            throw new Error(`Failed to fetch resident by user ID=${userId} and house ID=${houseId}`, { cause: error })
-        }
-    }
-
-    async findResidentCountForUpdate(houseId: string): Promise<number> {
+    async findResidentCount({ houseId, forUpdate = false }: { houseId: string, forUpdate?: boolean }): Promise<number> {
         if (!houseId.trim()) throw new Error("Cannot count residents in house without houseId")
         try {
-            const rows = await this.db.select({ id: ResidentTb.id }).from(ResidentTb).where(and(eq(ResidentTb.houseId, houseId), eq(ResidentTb.status, ResidentStatus.ACTIVE))).for("update")
+            let query = this.db
+                .select({ id: ResidentTb.id })
+                .from(ResidentTb)
+                .where(and(eq(ResidentTb.houseId, houseId), eq(ResidentTb.status, ResidentStatus.ACTIVE)))
+                .$dynamic()
+            if (forUpdate) query = query.for("update")
+
+            const rows = await query
             return rows.length
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findResidentCount" })

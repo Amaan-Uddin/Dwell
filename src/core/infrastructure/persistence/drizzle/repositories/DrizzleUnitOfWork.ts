@@ -8,11 +8,14 @@ import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepos
 import { DrizzleHouseRepository } from "./DrizzleHouseRepository"
 import { DrizzleResidentRepository } from "./DrizzleResidentRepository"
 import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
+import { DrizzleUserRepository } from "./DrizzleUserRepository"
+import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
 
 class DrizzleTransactionContext implements ITransactionContext {
 
     private _houseRepo?: IHouseRepository
     private _residentRepo?: IResidentRepository
+    private _userRepo?: IUserRepository
 
     constructor(private tx: Database) { }
 
@@ -22,6 +25,10 @@ class DrizzleTransactionContext implements ITransactionContext {
 
     get residentRepo() {
         return this._residentRepo ??= new DrizzleResidentRepository(this.tx)
+    }
+
+    get userRepo() {
+        return this._userRepo ??= new DrizzleUserRepository(this.tx)
     }
 }
 
