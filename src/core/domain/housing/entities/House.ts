@@ -159,21 +159,13 @@ export class House {
         this.markAsUpdated()
     }
 
-    transferOwnership(currentOwner: string, newOwner: string): void {
-        if (this.isAbandoned() || this.isArchived()) {
-            throw new Error("House must be active before transferring ownership.")
-        }
-
-        if (!currentOwner?.trim()) {
-            throw new Error("Current owner must be provided for transferring of ownership")
+    transferOwnership(newOwner: string): void {
+        if (!this.isActive()) {
+            throw new Error("Cannot transfer ownership of house that is not active.")
         }
 
         if (!newOwner?.trim()) {
             throw new Error("New owner must be provided for transferring of ownership.")
-        }
-
-        if (currentOwner !== this.ownedBy) {
-            throw new Error("Current owner mismatch.")
         }
 
         if (newOwner === this.ownedBy) {

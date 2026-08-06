@@ -209,7 +209,7 @@ export class Resident {
         throw new Error("User is in an invalid state to rejoin.")
     }
 
-    makeOwner(): void {
+    promoteToOwner(): void {
         if (this.isOwner()) {
             throw new Error("Resident is already an owner.")
         }
@@ -222,7 +222,7 @@ export class Resident {
         this.markAsUpdated()
     }
 
-    makeMember(): void {
+    demoteToMember(): void {
         if (this.isMember()) {
             throw new Error("Resident is already a member.")
         }
