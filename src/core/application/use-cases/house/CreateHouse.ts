@@ -32,7 +32,7 @@ export class CreateHouse {
 
         // everything inside here runs in ONE transaction
         const savedHouse = await this.uow.execute(async ({ houseRepo, residentRepo }) => {
-            const houseCount = await houseRepo.findHouseCountForUpdate(dto.userId)
+            const houseCount = await houseRepo.findHouseCount({ ownerId: dto.userId, forUpdate: true })
             if (houseCount >= MAX_HOUSE) {
                 throw new Error(`User already has reached the max limit of ${MAX_HOUSE} houses.`, { cause: "MAX_HOUSE_LIMIT" })
             }
@@ -41,11 +41,11 @@ export class CreateHouse {
             const house = House.create({ name: dto.name, description: dto.description, ownedBy: dto.userId })
 
             // save the house to our db using the transaction
-            const savedHouse = await houseRepo.save(house)
+            const savedHouse = await houseRepo.save({ house })
 
             // we also have to create the house owner resident record and save it
             const resident = Resident.create({ userId: dto.userId, houseId: savedHouse.id, role: ResidentRole.OWNER })
-            await residentRepo.save(resident)
+            await residentRepo.save({ resident })
 
             return savedHouse
         })

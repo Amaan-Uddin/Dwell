@@ -2,7 +2,6 @@ import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepos
 import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 import { LeaveHouseDTO } from "../../dtos/resident/LeaveHouseDTO"
-import { ResidentRole } from "@/core/domain/housing/entities/Resident"
 
 export class LeaveHouse {
     constructor(
@@ -14,29 +13,31 @@ export class LeaveHouse {
         if (!dto.residentId.trim()) throw new Error("Resident ID is required for this operation.")
         if (!dto.houseId.trim()) throw new Error("House ID is required for this operation.")
 
-        const residentCheck = await this.residentRepo.findById(dto.residentId)
+        const residentCheck = await this.residentRepo.findById({ id: dto.residentId })
         if (!residentCheck) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
 
-        const houseCheck = await this.houseRepo.findById(dto.houseId)
+        const houseCheck = await this.houseRepo.findById({ id: dto.houseId })
         if (!houseCheck) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
 
         await this.uow.execute(async ({ residentRepo, houseRepo }) => {
-            const house = await houseRepo.findByIdForUpdate(dto.houseId)
+            const house = await houseRepo.findById({ id: dto.houseId, forUpdate: true })
             if (!house) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
-            if (!house.isActive()) throw new Error("House is currently in-active or has no members.", { cause: "HOUSE_INACTIVE" })
+            if (house.isArchived()) throw new Error("House is archived.", { cause: "HOUSE_ARCHIVED" })
+            if (house.isAbandoned()) throw new Error("House is abandoned and has no active residents.", { cause: "HOUSE_ABANDONED" })
 
-            const resident = await residentRepo.findById(dto.residentId)
+            const resident = await residentRepo.findById({ id: dto.residentId })
             if (!resident) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
-            if (!resident.isActive()) throw new Error("Resident is currently not in house.", { cause: "RESIDENT_INACTIVE" })
-            if (resident.role === ResidentRole.OWNER) throw new Error("Owner must transfer ownership before leaving the house.", { cause: "OWNER_CANNOT_LEAVE" })
+            if (resident.houseId !== house.id) throw new Error("Resident does not belong to this house.", { cause: "RESIDENT_HOUSE_MISMATCH" })
+            if (!resident.isActive()) throw new Error("Resident is not in house.", { cause: "RESIDENT_INACTIVE" })
+            if (!resident.isOwner()) throw new Error("Owner must transfer ownership before leaving the house.", { cause: "OWNER_CANNOT_LEAVE" })
 
             resident.leave()
-            await residentRepo.save(resident)
+            await residentRepo.save({ resident })
 
-            const activeResidentsCount = await residentRepo.findResidentCountForUpdate(house.id)
+            const activeResidentsCount = await residentRepo.findResidentCount({ houseId: house.id, forUpdate: true })
             if (!activeResidentsCount) {
                 house.updateStatusToAbandoned()
-                await houseRepo.save(house)
+                await houseRepo.save({ house })
             }
         })
     }
