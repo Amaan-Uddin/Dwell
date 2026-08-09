@@ -36,6 +36,8 @@ export class JoinHouse {
 
             if (house.isAbandoned()) {
                 house.updateStatusToActive()
+                house.transferOwnership(resident.userId)
+                resident.promoteToOwner()
                 await houseRepo.save({ house })
             }
 
