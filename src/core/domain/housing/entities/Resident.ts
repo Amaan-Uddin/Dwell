@@ -152,7 +152,15 @@ export class Resident {
         this.markAsUpdated(now)
     }
 
-    remove(status: RemoveStatus = RemoveStatus.TEMP): void {
+    remove(status: RemoveStatus): void {
+        if (!status.trim()) {
+            throw new Error("Remove status is required.")
+        }
+
+        if (!Object.values(RemoveStatus).includes(status as RemoveStatus)) {
+            throw new Error("Invalid status provided.")
+        }
+
         if (this.isRemoved()) {
             throw new Error("User has already been removed.")
         }
