@@ -6,10 +6,13 @@ export const CreateHouseSchema = z.object({
         .max(30, "House name can have at most 30 characters.")
         .trim(),
     description: z.string().trim().optional(),
-    userId: z.uuid()
 })
 
-export type CreateHouseDTO = z.infer<typeof CreateHouseSchema>
+export type CreateHouseRequest = z.infer<typeof CreateHouseSchema>
+
+export interface CreateHouseDTO extends CreateHouseRequest {
+    userId: string
+}
 
 export interface CreateHouseResponseDTO {
     id: string

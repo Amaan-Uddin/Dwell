@@ -1,9 +1,12 @@
 import { z } from "zod"
 
 export const ChangeOwnershipSchema = z.object({
-    houseId: z.uuid(),
-    currentOwnerId: z.uuid(),
-    newOwnerId: z.uuid(),
+    newOwnerResidentId: z.uuid(),
 })
 
-export type ChangeOwnershipDTO = z.infer<typeof ChangeOwnershipSchema>
+export type ChangeOwnershipRequest = z.infer<typeof ChangeOwnershipSchema>
+
+export interface ChangeOwnershipDTO extends ChangeOwnershipRequest {
+    houseId: string,
+    actingUserId: string
+}
