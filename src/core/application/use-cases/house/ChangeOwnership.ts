@@ -1,10 +1,8 @@
-import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository"
-import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
 import { ChangeOwnershipDTO } from "../../dtos/house/ChangeOwnershipDTO"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 
 export class ChangeOwnership {
-    constructor(private houseRepo: IHouseRepository, private residentRepo: IResidentRepository, private uow: IUnitOfWork) { }
+    constructor(private uow: IUnitOfWork) { }
     async execute(dto: ChangeOwnershipDTO): Promise<void> {
         if (!dto.houseId.trim()) throw new Error("House ID is required for this operation.")
         if (!dto.currentOwnerId.trim()) throw new Error("Current owner's resident id is required for this operation")

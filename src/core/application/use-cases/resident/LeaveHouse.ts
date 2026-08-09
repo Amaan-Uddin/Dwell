@@ -4,10 +4,7 @@ import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 import { LeaveHouseDTO } from "../../dtos/resident/LeaveHouseDTO"
 
 export class LeaveHouse {
-    constructor(
-        private residentRepo: IResidentRepository,
-        private houseRepo: IHouseRepository,
-        private uow: IUnitOfWork) { }
+    constructor(private residentRepo: IResidentRepository, private houseRepo: IHouseRepository, private uow: IUnitOfWork) { }
 
     async execute(dto: LeaveHouseDTO): Promise<void> {
         if (!dto.residentId.trim()) throw new Error("Resident ID is required for this operation.")

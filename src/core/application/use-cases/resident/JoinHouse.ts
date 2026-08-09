@@ -1,12 +1,11 @@
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
 import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository"
-import { IResidentRepository } from "@/core/domain/housing/repositories/IResidentRepository"
 import { JoinHouseDTO } from "../../dtos/resident/JoinHouseDTO"
 import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 
 export class JoinHouse {
-    constructor(private residentRepo: IResidentRepository, private houseRepo: IHouseRepository, private userRepo: IUserRepository, private uow: IUnitOfWork) { }
+    constructor(private houseRepo: IHouseRepository, private userRepo: IUserRepository, private uow: IUnitOfWork) { }
 
     async execute(dto: JoinHouseDTO): Promise<void> {
         // check the dto arguments

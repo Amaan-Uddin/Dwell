@@ -1,4 +1,3 @@
-import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepository"
 import { CreateHouseDTO } from "../../dtos/house/CreateHouseDTO"
 import { CreateHouseResponseDTO } from "../../dtos/house/CreateHouseDTO"
 import { IUserRepository } from "@/core/domain/auth/repositories/IUserRepository"
@@ -8,7 +7,7 @@ import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 
 export class CreateHouse {
-    constructor(private houseRepo: IHouseRepository, private userRepo: IUserRepository, private uow: IUnitOfWork) { }
+    constructor(private userRepo: IUserRepository, private uow: IUnitOfWork) { }
 
     async execute(dto: CreateHouseDTO): Promise<CreateHouseResponseDTO> {
         // validate the userId which we receive from the client
