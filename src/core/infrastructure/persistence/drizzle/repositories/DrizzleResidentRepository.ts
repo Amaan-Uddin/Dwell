@@ -3,7 +3,7 @@ import { IResidentRepository } from "@/core/domain/housing/repositories/IResiden
 import { Database } from "@/db"
 import { ResidentSelectType, resident as ResidentTb } from "@/db/schema/housing/resident"
 import { drizzleErrorLogger } from "../utils"
-import { and, eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 
 export class DrizzleResidentRepository implements IResidentRepository {
     constructor(private readonly db: Database) { }
@@ -19,6 +19,25 @@ export class DrizzleResidentRepository implements IResidentRepository {
         } catch (error) {
             drizzleErrorLogger(error, { operation: "save" })
             throw new Error("Failed to save resident data to db.", { cause: error })
+        }
+    }
+
+    async saveMany({ residents }: { residents: Resident[] }): Promise<Resident[]> {
+        const db_rows = residents.map(item => this.toPersistence(item))
+        try {
+            const rows = await this.db.insert(ResidentTb).values(db_rows).onConflictDoUpdate({
+                target: ResidentTb.id,
+                set: {
+                    status: sql`excluded.status`,
+                    role: sql`excluded.role`,
+                    updatedAt: sql`excluded.updatedAt`
+                }
+            }).returning()
+
+            return rows.map(row => this.toDomain(row))
+        } catch (error) {
+            drizzleErrorLogger(error, { operation: "saveMany" })
+            throw new Error("Failed to save many resident data to db.", { cause: error })
         }
     }
 

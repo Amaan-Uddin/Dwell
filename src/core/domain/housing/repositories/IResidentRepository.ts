@@ -2,6 +2,7 @@ import { Resident } from "../entities/Resident";
 
 export interface IResidentRepository {
     save(params: { resident: Resident }): Promise<Resident>
+    saveMany(params: { residents: Resident[] }): Promise<Resident[]>
     findById(params: { id: string, forUpdate?: boolean }): Promise<Resident | null>
 
     // these methods help fetch all the residents in a particular house or resident records of a particular user
