@@ -11,7 +11,7 @@ export const item = assetSchema.table("item", {
     count: integer().default(0).notNull(),
     inventoryId: uuid().references(() => inventory.id).notNull(),
     createdAt: timestamp().defaultNow().notNull(),
-    updatedAt: timestamp()
+    updatedAt: timestamp().notNull()
 })
 
 export type ItemSelectType = typeof item.$inferSelect
