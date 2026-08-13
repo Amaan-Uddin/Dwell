@@ -1,19 +1,19 @@
-import { integer, timestamp, jsonb, bigserial } from "drizzle-orm/pg-core"
+import { integer, timestamp, jsonb, bigserial, uuid } from "drizzle-orm/pg-core"
 import { systemSchema } from "./schema"
-import { user } from "../auth/user"
 import { item } from "../asset/item"
 import { inventory } from "../asset/inventory"
+import { resident } from "../housing/resident"
 
-const auditEvents = systemSchema.enum("audit_events", ["ADDED", "CONSUMED", "RECONCILED", "EXPIRED", "RETURNED"])
+const actionType = systemSchema.enum("action_type", ["ADDED", "CONSUMED", "RECONCILED", "EXPIRED"])
 
 export const audit = systemSchema.table("audit", {
-    id: integer().primaryKey().generatedByDefaultAsIdentity(),
-    eventNumber: bigserial({ mode: "number" }),
-    userId: integer().references(() => user.id).notNull(),
-    itemId: integer().references(() => item.id).notNull(),
-    inventoryId: integer().references(() => inventory.id).notNull(),
-    actionType: auditEvents().notNull(),
-    qtyChange: integer().notNull(),
+    id: uuid().primaryKey(),
+    eventNumber: bigserial({ mode: "number" }).notNull(),
+    residentId: uuid().references(() => resident.id).notNull(),
+    itemId: uuid().references(() => item.id).notNull(),
+    inventoryId: uuid().references(() => inventory.id).notNull(),
+    actionType: actionType().notNull(),
+    delta: integer().notNull(),
     metadata: jsonb(),
     createdAt: timestamp().defaultNow().notNull(),
 })
