@@ -13,7 +13,7 @@ export interface ItemProps {
 }
 
 export class Item {
-    constructor(private props: ItemProps) { }
+    private constructor(private props: ItemProps) { }
 
     static create(params: {
         name: string,

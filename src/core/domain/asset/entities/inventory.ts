@@ -6,7 +6,7 @@ export interface InventoryProps {
 }
 
 export class Inventory {
-    constructor(private props: InventoryProps) { }
+    private constructor(private props: InventoryProps) { }
 
     static create(params: {
         houseId: string
