@@ -42,7 +42,7 @@ export class DrizzleItemRepository implements IItemRepository {
     }
 
     private toDomain(db_item: ItemSelectType): Item {
-        if (!Object.keys(ItemStatus).includes(db_item.status)) throw new Error(`Database corruption detected: Invalid item status: ${db_item.status}`)
+        if (!Object.values(ItemStatus).includes(db_item.status as ItemStatus)) throw new Error(`Database corruption detected: Invalid item status: ${db_item.status}`)
         return Item.reconstitute({
             id: db_item.id,
             inventoryId: db_item.inventoryId,
