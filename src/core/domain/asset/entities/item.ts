@@ -22,11 +22,12 @@ export class Item {
         if (!params.name.trim()) throw new Error("Item name is required.")
         if (!params.inventoryId.trim()) throw new Error("Item requires an inventory.")
 
+        const normalizedName = params.name.trim().replace(/\s+g/, " ")
         const now = new Date()
 
         return new Item({
             id: crypto.randomUUID(),
-            name: params.name,
+            name: normalizedName,
             status: ItemStatus.ACTIVE,
             count: 0,
             inventoryId: params.inventoryId,
@@ -45,6 +46,10 @@ export class Item {
 
     private markAsUpdated(date: Date = new Date()): void {
         this.props.updatedAt = date
+    }
+
+    private normalizeName(name: string) {
+        return name.trim().replace(/\s+g/, " ")
     }
 
     get id(): string {
@@ -78,7 +83,8 @@ export class Item {
 
     rename(newName: string): void {
         if (!newName.trim()) throw new Error("New name is required for renaming.")
-        this.props.name = newName
+        const normalizedName = this.normalizeName(newName)
+        this.props.name = normalizedName
         this.markAsUpdated()
     }
 
