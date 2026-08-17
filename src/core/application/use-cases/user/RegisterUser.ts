@@ -14,7 +14,7 @@ export class RegisterUser {
 
     async execute(dto: RegisterUserDTO): Promise<RegisterUserResponseDTO> {
         // find if an user with same email id exists or not
-        const emailTaken = await this.userRepo.findByEmail(dto.email)
+        const emailTaken = await this.userRepo.findByEmail({ email: dto.email })
         if (emailTaken) throw new Error("Email already in use.")
 
         // create a validated email value object
@@ -36,7 +36,7 @@ export class RegisterUser {
         })
 
         // save the user to our database
-        const savedUser = await this.userRepo.save(user)
+        const savedUser = await this.userRepo.save({ user: user })
 
         // return a JSON compatible response back to client
         return UserMapper.toRegisterUserDTO(savedUser)

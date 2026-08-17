@@ -13,7 +13,7 @@ export class JoinHouse {
         if (!dto.userId.trim()) throw new Error("User ID is required to join a house.")
 
         // check to see if the user exist and whether or not their status is ACTIVE and they are not GUEST
-        const user = await this.userRepo.findById(dto.userId)
+        const user = await this.userRepo.findById({ id: dto.userId })
         if (!user) throw new Error("User does not exist.", { cause: "USER_NOT_FOUND" })
         if (user.isDeleted()) throw new Error("User account is deleted. Reactivate account to use it.", { cause: "USER_DELETED" })
         if (user.isGuest()) throw new Error("Guest users cannot join houses.", { cause: "GUEST_USER" })

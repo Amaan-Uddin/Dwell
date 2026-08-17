@@ -16,7 +16,7 @@ export class CreateHouse {
         }
 
         // check if the user exists or not
-        const user = await this.userRepo.findById(dto.userId)
+        const user = await this.userRepo.findById({ id: dto.userId })
         if (!user) {
             throw new Error("User does not exist.", { cause: "USER_NOT_FOUND" })
         }

@@ -15,7 +15,7 @@ export class GetUser {
     ) { }
 
     async executeFromClerkSession(dto: GetUserFromClerkDTO): Promise<GetUserResponseDTO> {
-        let user = await this.userRepo.findByExternalAuthId(dto.externalAuthId)
+        let user = await this.userRepo.findByExternalAuthId({ externalAuthId: dto.externalAuthId })
 
         // performing JIT=Just-In-Time Provisioning, we are creating a local user in our db at the moment we need it, rather than upfront
         if (!user) {
@@ -29,7 +29,7 @@ export class GetUser {
                 externalAuthId: dto.externalAuthId
             })
 
-            await this.userRepo.save(user)
+            await this.userRepo.save({ user: user })
         }
 
         return UserMapper.toGetUserDTO(user)
@@ -39,14 +39,14 @@ export class GetUser {
         const session = await this.sessionService.validateSession(dto.sessionId)
         if (!session) return null
 
-        const user = await this.userRepo.findById(session.userId)
+        const user = await this.userRepo.findById({ id: session.userId })
         if (!user) throw new Error(`User with ID=${session.userId} does not exist.`)
 
         return UserMapper.toGetUserDTO(user)
     }
 
     async execute(dto: GetUserDTO): Promise<GetUserResponseDTO | null> {
-        const user = await this.userRepo.findById(dto.userId)
+        const user = await this.userRepo.findById({ id: dto.userId })
         if (!user) throw new Error(`User with ID=${dto.userId} does not exist.`)
 
         return UserMapper.toGetUserDTO(user)

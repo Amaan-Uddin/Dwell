@@ -12,7 +12,7 @@ export class CreateGuest {
         const guest = User.createGuest()
 
         // save the guest to our db
-        await this.userRepo.save(guest)
+        await this.userRepo.save({ user: guest })
 
         // create a session for the guest
         const { sessionId } = await this.sessionService.createSession(guest.id)

@@ -10,7 +10,7 @@ import { drizzleErrorLogger } from "../utils"
 export class DrizzleUserRepository implements IUserRepository {
     constructor(private readonly db: Database) { }
 
-    async save(user: User): Promise<User> {
+    async save({ user }: { user: User }): Promise<User> {
         const db_row = this.toPersistence(user)
         try {
             const [row] = await this.db.insert(UserTb).values(db_row).onConflictDoUpdate({
@@ -24,7 +24,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async forceDelete(id: string): Promise<void> {
+    async forceDelete({ id }: { id: string }): Promise<void> {
         if (!id.trim()) throw new Error("Cannot force delete a user without an ID.")
         try {
             const result = await this.db.delete(UserTb)
@@ -42,7 +42,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findById(id: string): Promise<User | null> {
+    async findById({ id }: { id: string }): Promise<User | null> {
         if (!id.trim()) throw new Error("Cannot find user without ID.")
         try {
             const [row] = await this.db.select().from(UserTb).where(eq(UserTb.id, id))
@@ -53,7 +53,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findByEmail(email: string): Promise<User | null> {
+    async findByEmail({ email }: { email: string }): Promise<User | null> {
         if (!email.trim()) throw new Error("Cannot find user without email.")
         try {
             const [row] = await this.db.select().from(UserTb).where(eq(UserTb.email, email))
@@ -64,7 +64,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findByExternalAuthId(externalAuthId: string): Promise<User | null> {
+    async findByExternalAuthId({ externalAuthId }: { externalAuthId: string }): Promise<User | null> {
         if (!externalAuthId.trim()) throw new Error("Cannot find user without externalAuthId.")
         try {
             const [row] = await this.db.select().from(UserTb).where(eq(UserTb.externalAuthId, externalAuthId)).limit(1)
@@ -75,7 +75,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findByStatus(status: UserStatus): Promise<User[]> {
+    async findByStatus({ status }: { status: UserStatus }): Promise<User[]> {
         if (!status) throw new Error("Cannot find user without valid status.")
         try {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.status, status))
@@ -86,7 +86,7 @@ export class DrizzleUserRepository implements IUserRepository {
         }
     }
 
-    async findByRole(role: UserRoles): Promise<User[]> {
+    async findByRole({ role }: { role: UserRoles }): Promise<User[]> {
         if (!role) throw new Error("Cannot find user without valid role.")
         try {
             const result = await this.db.select().from(UserTb).where(eq(UserTb.role, role))
