@@ -100,11 +100,11 @@ export class Item {
         this.markAsUpdated()
     }
 
-    changeCount(delta: number): void {
-        if (delta == 0) throw new Error("Quantity cannot be 0.")
+    applyQuantityChange(qty: number): void {
+        if (qty == 0) throw new Error("Quantity cannot be 0.")
 
-        const newCount = this.count + delta
-        if (newCount < 0) throw new Error(`Cannot reduce quantity below 0 (current qty: ${this.count}, change: ${delta}).`)
+        const newCount = this.count + qty
+        if (newCount < 0) throw new Error(`Cannot reduce quantity below 0 (current qty: ${this.count}, change: ${qty}).`)
 
         this.props.count = newCount
         this.markAsUpdated()
