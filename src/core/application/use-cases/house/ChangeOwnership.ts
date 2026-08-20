@@ -1,36 +1,33 @@
 import { ChangeOwnershipDTO } from "../../dtos/house/ChangeOwnershipDTO"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
+import { assertRequireParam } from "../../shared/guards/global"
+import { assertHouseIsOperable, assertResidentBelongsToHouse, assertResidentExists, assertResidentIsActive } from "../../shared/guards/housing"
 
 export class ChangeOwnership {
     constructor(private uow: IUnitOfWork) { }
     async execute(dto: ChangeOwnershipDTO): Promise<void> {
-        if (!dto.houseId.trim()) throw new Error("House ID is required for this operation.")
-        if (!dto.newOwnerResidentId.trim()) throw new Error("New owner's resident ID is required for this operation.")
+        assertRequireParam(dto.houseId, "House ID")
+        assertRequireParam(dto.newOwnerResidentId, "New owner's resident ID")
 
         await this.uow.execute(async ({ houseRepo, residentRepo }) => {
             const house = await houseRepo.findById({ id: dto.houseId, forUpdate: true })
-            if (!house) throw new Error("House not found.", { cause: "HOUSE_NOT_FOUND" })
-            if (house.isArchived()) throw new Error("House is archived and cannot be transferred.", { cause: "HOUSE_ARCHIVED" })
-            if (house.isAbandoned()) throw new Error("House is abandoned and has no active residents to transfer ownership to.", { cause: "HOUSE_ABANDONED" })
-
-            if (house.ownedBy !== dto.actingUserId) {
-                throw new Error("Only the owner can transfer ownership.", { cause: "NOT_AUTHORIZED" })
-            }
+            assertHouseIsOperable(house)
+            if (house.ownedBy !== dto.actingUserId) throw new Error("Only the owner can transfer ownership.", { cause: "NOT_AUTHORIZED" })
 
             const newOwner = await residentRepo.findById({ id: dto.newOwnerResidentId })
-            if (!newOwner) throw new Error("Resident not found.", { cause: "RESIDENT_NOT_FOUND" })
-            if (newOwner.houseId !== house.id) throw new Error("Resident does not belong to this house.", { cause: "RESIDENT_HOUSE_MISMATCH" })
-            if (!newOwner.isActive()) throw new Error("New owner must be an active resident.", { cause: "RESIDENT_INACTIVE" })
+            assertResidentExists(newOwner)
+            assertResidentBelongsToHouse(newOwner, house)
+            assertResidentIsActive(newOwner)
 
             const currentOwner = await residentRepo.findByUserAndHouseId({ userId: house.ownedBy, houseId: house.id })
-            if (!currentOwner) throw new Error("Current owner resident record not found.", { cause: "OWNER_NOT_FOUND" })
+            assertResidentExists(currentOwner)
             if (currentOwner.id === newOwner.id) throw new Error("This resident is already the owner.", { cause: "ALREADY_OWNER" })
 
             const [first, second] = [currentOwner, newOwner].sort((a, b) => a.id.localeCompare(b.id))
             await residentRepo.findById({ id: first.id, forUpdate: true })
             await residentRepo.findById({ id: second.id, forUpdate: true })
 
-            house.transferOwnership(newOwner.id)
+            house.transferOwnership(newOwner.userId)
             currentOwner.demoteToMember()
             newOwner.promoteToOwner()
 

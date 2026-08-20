@@ -3,25 +3,27 @@ import { IHouseRepository } from "@/core/domain/housing/repositories/IHouseRepos
 import { JoinHouseDTO } from "../../dtos/resident/JoinHouseDTO"
 import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
+import { assertRequireParam } from "../../shared/guards/global"
+import { assertHouseExists, assertHouseIsNotArchived } from "../../shared/guards/housing"
+import { assertUserExists, assertUserIsNotDeleted, assertUserIsNotGuest } from "../../shared/guards/auth"
 
 export class JoinHouse {
     constructor(private houseRepo: IHouseRepository, private userRepo: IUserRepository, private uow: IUnitOfWork) { }
 
     async execute(dto: JoinHouseDTO): Promise<void> {
         // check the dto arguments
-        if (!dto.houseId.trim()) throw new Error("House ID is required to join that house.")
-        if (!dto.userId.trim()) throw new Error("User ID is required to join a house.")
+        assertRequireParam(dto.userId, "User ID")
+        assertRequireParam(dto.houseId, "House ID")
 
         // check to see if the user exist and whether or not their status is ACTIVE and they are not GUEST
         const user = await this.userRepo.findById({ id: dto.userId })
-        if (!user) throw new Error("User does not exist.", { cause: "USER_NOT_FOUND" })
-        if (user.isDeleted()) throw new Error("User account is deleted. Reactivate account to use it.", { cause: "USER_DELETED" })
-        if (user.isGuest()) throw new Error("Guest users cannot join houses.", { cause: "GUEST_USER" })
-
+        assertUserExists(user)
+        assertUserIsNotDeleted(user)
+        assertUserIsNotGuest(user)
 
         const house = await this.houseRepo.findById({ id: dto.houseId })
-        if (!house) throw new Error("House does not exist.", { cause: "HOUSE_NOT_FOUND" })
-        if (house.isArchived()) throw new Error("House is archived, and can no longer be joined.", { cause: "HOUSE_ARCHIVED" })
+        assertHouseExists(house)
+        assertHouseIsNotArchived(house)
 
         await this.uow.execute(async ({ houseRepo, residentRepo }) => {
             // check for a resident record in db which links to the userId and houseId and lock it in place to disallow multiple same requests

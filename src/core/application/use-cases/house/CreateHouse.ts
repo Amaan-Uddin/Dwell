@@ -5,33 +5,28 @@ import { HouseMapper } from "../../mappers/HouseMapper"
 import { IUnitOfWork } from "@/core/domain/shared/IUnitOfWork"
 import { Resident, ResidentRole } from "@/core/domain/housing/entities/Resident"
 import { Inventory } from "@/core/domain/asset/entities/inventory"
+import { assertRequireParam } from "../../shared/guards/global"
+import { assertUserExists } from "../../shared/guards/auth"
 
 export class CreateHouse {
     constructor(private userRepo: IUserRepository, private uow: IUnitOfWork) { }
 
     async execute(dto: CreateHouseDTO): Promise<CreateHouseResponseDTO> {
         // validate the userId which we receive from the client
-        if (!dto.userId.trim()) {
-            throw new Error("Cannot create house without a user.")
-        }
-
-        // check if the user exists or not
-        const user = await this.userRepo.findById({ id: dto.userId })
-        if (!user) {
-            throw new Error("User does not exist.", { cause: "USER_NOT_FOUND" })
-        }
-
+        assertRequireParam(dto.userId, "User ID")
         // validate the house name
-        if (!dto.name.trim()) {
-            throw new Error("House name cannot be empty.")
-        }
+        assertRequireParam(dto.name, "House Name")
 
         // check how many houses does the user already own
         const MAX_HOUSE = 5
 
         // everything inside here runs in ONE transaction
-        const savedHouse = await this.uow.execute(async ({ houseRepo, residentRepo, inventoryRepo }) => {
-            const houseCount = await houseRepo.findHouseCount({ ownerId: dto.userId, forUpdate: true })
+        const savedHouse = await this.uow.execute(async ({ houseRepo, residentRepo, userRepo, inventoryRepo }) => {
+            // check if the user exists or not
+            const user = await userRepo.findById({ id: dto.userId })
+            assertUserExists(user)
+
+            const houseCount = await houseRepo.findHouseCount({ ownerId: user.id, forUpdate: true })
             if (houseCount >= MAX_HOUSE) {
                 throw new Error(`User already has reached the max limit of ${MAX_HOUSE} houses.`, { cause: "MAX_HOUSE_LIMIT" })
             }
