@@ -14,6 +14,8 @@ import { DrizzleInventoryRepository } from "./DrizzleInventoryRepository"
 import { IInventoryRepository } from "@/core/domain/asset/repository/IInventoryRepository"
 import { DrizzleItemRepository } from "./DrizzleItemRepository"
 import { IItemRepository } from "@/core/domain/asset/repository/IItemRepository"
+import { DrizzleAuditRepository } from "./DrizzleAuditRepository"
+import { IAuditRepository } from "@/core/domain/system/repositories/IAuditRepository"
 
 class DrizzleTransactionContext implements ITransactionContext {
 
@@ -22,6 +24,7 @@ class DrizzleTransactionContext implements ITransactionContext {
     private _userRepo?: IUserRepository
     private _inventoryRepo?: IInventoryRepository
     private _itemRepo?: IItemRepository
+    private _auditRepo?: IAuditRepository
 
     constructor(private tx: Database) { }
 
@@ -43,6 +46,10 @@ class DrizzleTransactionContext implements ITransactionContext {
 
     get itemRepo() {
         return this._itemRepo ??= new DrizzleItemRepository(this.tx)
+    }
+
+    get auditRepo() {
+        return this._auditRepo ??= new DrizzleAuditRepository(this.tx)
     }
 }
 
