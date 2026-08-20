@@ -22,10 +22,13 @@ export class DrizzleItemRepository implements IItemRepository {
         }
     }
 
-    async findById({ id }: { id: string }): Promise<Item | null> {
+    async findById({ id, forUpdate = false }: { id: string, forUpdate?: boolean }): Promise<Item | null> {
         if (!id.trim()) throw new Error("Cannot find item without ID.")
         try {
-            const [row] = await this.db.select().from(ItemTb).where(eq(ItemTb.id, id))
+            let query = this.db.select().from(ItemTb).where(eq(ItemTb.id, id)).$dynamic()
+            if (forUpdate) query = query.for("update")
+
+            const [row] = await query
             return row ? this.toDomain(row) : null
         } catch (error) {
             drizzleErrorLogger(error, { operation: "findById" })
